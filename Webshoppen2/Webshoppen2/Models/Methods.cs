@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,17 +15,13 @@ namespace Webshoppen2.Models
             while (true)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("SYSTEMUTVECKLINGSBOLAGET");
+                Console.WriteLine("  ____            _                       _                  _    _ _                 _           _                  _   \r\n / ___| _   _ ___| |_ ___ _ __ ___  _   _| |___   _____  ___| | _| (_)_ __   __ _ ___| |__   ___ | | __ _  __ _  ___| |_ \r\n \\___ \\| | | / __| __/ _ \\ '_ ` _ \\| | | | __\\ \\ / / _ \\/ __| |/ / | | '_ \\ / _` / __| '_ \\ / _ \\| |/ _` |/ _` |/ _ \\ __|\r\n  ___) | |_| \\__ \\ ||  __/ | | | | | |_| | |_ \\ V /  __/ (__|   <| | | | | | (_| \\__ \\ |_) | (_) | | (_| | (_| |  __/ |_ \r\n |____/ \\__, |___/\\__\\___|_| |_| |_|\\__,_|\\__| \\_/ \\___|\\___|_|\\_\\_|_|_| |_|\\__, |___/_.__/ \\___/|_|\\__,_|\\__, |\\___|\\__|\r\n        |___/                                                               |___/                         |___/  ");
                 Console.ResetColor();
-                Console.WriteLine();
-                Console.WriteLine("Välkommen till vår vackra webshop! Här kan du köpa sprit.");
-                Console.WriteLine();
-                Console.WriteLine("Top tre produkter: ");
-                Console.WriteLine();
-
-                Console.WriteLine("1. Fritextsök");
-                Console.WriteLine("2. Kategorier");
-                Console.WriteLine("3. Admin");
+                Console.WriteLine($"\n\t\t  Welcome to our beautiful webshop! Here can you buy spirits and get wasted!\n\n"
+                    + "Top three products."
+                    + "\n1. Free text search."
+                    + "\n2. Categories."
+                    + "\n3. Admin.");
 
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
@@ -57,27 +54,27 @@ namespace Webshoppen2.Models
 
             while (runCategories)
             {
-                Console.WriteLine("1. Öl");
-                Console.WriteLine("2. Vin");
-                Console.WriteLine("3. Sprit");
+                Console.WriteLine($"1. Beer"
+                    + "\n2. Wine"
+                    + "\n3. Spirits");               
 
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
                 switch (key.KeyChar)
                 {
                     case '1':
-                        //ShowAllBeer();
-                        Console.WriteLine("Välj en öl: ");
+                        ShowAllBeer();
+                        Console.WriteLine("Choose a beer: ");
                         CartChoice();
                         break;
                     case '2':
                         //ShowAllWine();
-                        Console.WriteLine("Välj ett vin: ");
+                        Console.WriteLine("Choose a wine: ");
                         CartChoice();
                         break;
                     case '3':
                         //ShowAllSpirits();
-                        Console.WriteLine("Välj sprit: ");
+                        Console.WriteLine("Choose spirits: ");
                         CartChoice();
                         break;
                     default:
@@ -90,10 +87,30 @@ namespace Webshoppen2.Models
             }
         }
 
+        private static void ShowAllBeer()
+        {
+            using (var db = new webshoppenContext())
+            {
+                foreach(var p in db.Products.Include(s => s.Supplier)) 
+                {
+                    Console.ForegroundColor= ConsoleColor.Green;
+                    Console.WriteLine($"\nList of beers. Enjoy!");
+                    Console.ResetColor();
+                    Console.Write($" - [ID: {p.Id}] {p.Name}, Info: {p.InfoText} Price: {p.Price}SEK, from the company");
+                    foreach (var s in db.Suppliers)
+                    {
+                        Console.WriteLine($" {s.Name}.");
+                    }
+
+                }
+                Console.WriteLine();
+            }
+        }
+
         internal static void CartChoice()
         {
 
-            Console.WriteLine("Lägg till i varukorg?");
+            Console.WriteLine("Add to cart?");
             var choice = Console.ReadLine();
             if (choice == "y")
             {
@@ -112,9 +129,9 @@ namespace Webshoppen2.Models
 
         private static void Admin()
         {
-            Console.WriteLine("1. Lägg till produkt");
-            Console.WriteLine("2. Ändra produkt");
-            Console.WriteLine("3. Ta bort produkt");
+            Console.WriteLine($"1. Add a product."
+                +"\n2. Change a product."
+                +"\n3. Delete a product.");
 
             ConsoleKeyInfo key = Console.ReadKey(true);
 
@@ -140,21 +157,21 @@ namespace Webshoppen2.Models
 
         private static void AddProduct()
         {
-            Console.WriteLine("Ange produktens namn: ");
+            Console.WriteLine("Enter product name: ");
             string name = Console.ReadLine();
-            Console.WriteLine("Ange produktens pris: ");
-            int price = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Ange produktens leverantörs-nummer: ");
+            Console.WriteLine("Enter product price: ");
+            var price = Convert.ToDouble(Console.ReadLine());
+            Console.WriteLine("Enter product supplier-id: ");
             int supplierId = Convert.ToInt32(Console.ReadLine());
             //ShowListSupplier();
 
-            Console.WriteLine("Ange produktens kategori-id: ");
+            Console.WriteLine("Enter product category-id: ");
             int categoryId = Convert.ToInt32(Console.ReadLine());
             //ShowListCategory();
 
-            Console.WriteLine("Skriv en info-text om produkten: ");
+            Console.WriteLine("Enter product information text: ");
             var infotext = Console.ReadLine();
-            Console.WriteLine("Ange antal produkter som finns på lager: ");
+            Console.WriteLine("Enter number of products in stock: ");
             int unitsInStock = Convert.ToInt32(Console.ReadLine());
 
             using (var db = new webshoppenContext())
@@ -176,7 +193,7 @@ namespace Webshoppen2.Models
 
         internal static void InputInstructions()
         {
-            Console.WriteLine("Felaktig inmatning.");
+            Console.WriteLine("Wrong input. Try something else!");
         }
     }
 }
