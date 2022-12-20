@@ -46,7 +46,7 @@ namespace Webshoppen2.Models
             {
                 entity.ToTable("Category");
 
-                entity.Property(e => e.Name).HasMaxLength(1);
+                entity.Property(e => e.Name).HasMaxLength(30);
             });
 
             modelBuilder.Entity<City>(entity =>
@@ -58,7 +58,7 @@ namespace Webshoppen2.Models
 
                 entity.Property(e => e.Ld).HasColumnName("ld");
 
-                entity.Property(e => e.Name).HasMaxLength(1);
+                entity.Property(e => e.Name).HasMaxLength(30);
             });
 
             modelBuilder.Entity<Country>(entity =>
@@ -71,18 +71,18 @@ namespace Webshoppen2.Models
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-                entity.Property(e => e.Name).HasMaxLength(1);
+                entity.Property(e => e.Name).HasMaxLength(30);
             });
 
             modelBuilder.Entity<Customer>(entity =>
             {
                 entity.ToTable("Customer");
 
-                entity.Property(e => e.Adress).HasMaxLength(1);
+                entity.Property(e => e.Adress).HasMaxLength(30);
 
-                entity.Property(e => e.Email).HasMaxLength(1);
+                entity.Property(e => e.Email).HasMaxLength(30);
 
-                entity.Property(e => e.Name).HasMaxLength(1);
+                entity.Property(e => e.Name).HasMaxLength(30);
 
                 entity.Property(e => e.PaymentInfoId).HasColumnName("PaymentInfoID");
 
@@ -101,7 +101,7 @@ namespace Webshoppen2.Models
             {
                 entity.ToTable("PaymentInfo");
 
-                entity.Property(e => e.Method).HasMaxLength(1);
+                entity.Property(e => e.Method).HasMaxLength(30);
             });
 
             modelBuilder.Entity<Product>(entity =>
@@ -110,7 +110,7 @@ namespace Webshoppen2.Models
 
                 entity.Property(e => e.InfoText).HasColumnType("text");
 
-                entity.Property(e => e.Name).HasMaxLength(1);
+                entity.Property(e => e.Name).HasMaxLength(30);
 
                 entity.Property(e => e.SupplierId).HasColumnName("SupplierID");
 
@@ -129,14 +129,14 @@ namespace Webshoppen2.Models
             {
                 entity.ToTable("ShippingInfo");
 
-                entity.Property(e => e.ParcelServiceName).HasMaxLength(1);
+                entity.Property(e => e.ParcelServiceName).HasMaxLength(30);
             });
 
             modelBuilder.Entity<Supplier>(entity =>
             {
                 entity.ToTable("Supplier");
 
-                entity.Property(e => e.Name).HasMaxLength(1);
+                entity.Property(e => e.Name).HasMaxLength(30);
 
                 entity.HasOne(d => d.City)
                     .WithMany(p => p.Suppliers)

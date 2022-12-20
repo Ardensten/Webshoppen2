@@ -10,16 +10,15 @@ namespace Webshoppen2.Models
     {
         internal static void Running()
         {
+
             while (true)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("SYSTEMUTVECKLINGSBOLAGET");
                 Console.ResetColor();
-
                 Console.WriteLine();
                 Console.WriteLine("Välkommen till vår vackra webshop! Här kan du köpa sprit.");
                 Console.WriteLine();
-
                 Console.WriteLine("Top tre produkter: ");
                 Console.WriteLine();
 
@@ -41,23 +40,22 @@ namespace Webshoppen2.Models
                         Admin();
                         break;
                     default:
-
+                        InputInstructions();
                         break;
 
                 }
 
-               Console.ReadKey(true);
+                Console.ReadKey(true);
+                Console.Clear();
             }
         }
-
-
 
         internal static void Categories()
         {
             Console.Clear();
             bool runCategories = true;
 
-            while(runCategories) 
+            while (runCategories)
             {
                 Console.WriteLine("1. Öl");
                 Console.WriteLine("2. Vin");
@@ -83,11 +81,12 @@ namespace Webshoppen2.Models
                         CartChoice();
                         break;
                     default:
-                        //
+                        InputInstructions();
                         break;
                 }
 
                 Console.ReadKey();
+                Console.Clear();
             }
         }
 
@@ -104,9 +103,9 @@ namespace Webshoppen2.Models
             {
                 Categories();
             }
-            else 
+            else
             {
-                Console.WriteLine("Felaktig inmatning.");
+                InputInstructions();
                 Categories();
             }
         }
@@ -122,7 +121,7 @@ namespace Webshoppen2.Models
             switch (key.KeyChar)
             {
                 case '1':
-                    //Add product
+                    AddProduct();
                     break;
                 case '2':
                     //Edit product
@@ -131,12 +130,53 @@ namespace Webshoppen2.Models
                     //Remove product
                     break;
                 default:
-                    //
+                    InputInstructions();
                     break;
-
             }
 
             Console.ReadKey();
+            Console.Clear();
+        }
+
+        private static void AddProduct()
+        {
+            Console.WriteLine("Ange produktens namn: ");
+            string name = Console.ReadLine();
+            Console.WriteLine("Ange produktens pris: ");
+            int price = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine("Ange produktens leverantörs-nummer: ");
+            int supplierId = Convert.ToInt32(Console.ReadLine());
+            //ShowListSupplier();
+
+            Console.WriteLine("Ange produktens kategori-id: ");
+            int categoryId = Convert.ToInt32(Console.ReadLine());
+            //ShowListCategory();
+
+            Console.WriteLine("Skriv en info-text om produkten: ");
+            var infotext = Console.ReadLine();
+            Console.WriteLine("Ange antal produkter som finns på lager: ");
+            int unitsInStock = Convert.ToInt32(Console.ReadLine());
+
+            using (var db = new webshoppenContext())
+            {
+                var newProduct = new Product
+                {
+                    Name = name,
+                    Price = price,
+                    SupplierId = supplierId,
+                    CategoryId = categoryId,
+                    InfoText = infotext,
+                    UnitsInStock = unitsInStock
+                };
+                var productList = db.Products;
+                productList.Add(newProduct);
+                db.SaveChanges();
+            }
+        }
+
+        internal static void InputInstructions()
+        {
+            Console.WriteLine("Felaktig inmatning.");
         }
     }
 }
