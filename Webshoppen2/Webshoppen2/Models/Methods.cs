@@ -140,7 +140,7 @@ namespace Webshoppen2.Models
                     //Edit product
                     break;
                 case '3':
-                    //Remove product
+                    RemoveProduct();
                     break;
                 default:
                     InputInstructions();
@@ -184,6 +184,84 @@ namespace Webshoppen2.Models
                 var productList = db.Products;
                 productList.Add(newProduct);
                 db.SaveChanges();
+            }
+        }
+
+        public static void RemoveProduct()
+        {
+            Console.WriteLine("Input id of product you want to delete");
+            var productId = Convert.ToInt32(Console.ReadLine());
+
+            using (var db = new webshoppenContext())
+            {
+                var product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
+
+                if (product != null)
+                {
+                    db.Products.Remove((Product)product);
+                    db.SaveChanges();  
+                }
+
+            }
+
+        }
+
+        public static void EditProduct()
+        {
+            Console.WriteLine("Input id of product you want to edit");
+            var productId = Convert.ToInt32(Console.ReadLine());
+
+            Console.WriteLine("What do you want to edit?\n" +
+                "[1] : Name\n" +
+                "[2] : Price\n" +
+                "[3] : Infotext\n" +
+                "[4] : Units in Stock\n" +
+                "[5] : Frontpage product");
+
+            ConsoleKeyInfo key = Console.ReadKey(true);
+
+            switch (key.KeyChar)
+            {
+                case '1':
+                    Console.WriteLine("What is the new name");
+                    var newName = Console.ReadLine();
+                    using (var db = new webshoppenContext())
+                    {
+                        var product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
+
+                        if (product != null)
+                        {
+                            product.Name = newName;
+                            db.SaveChanges();
+                        }
+
+                    }
+                    break;
+
+                case '2':                    
+                    break;
+
+                case '3':                    
+                    break;
+
+                case '4':
+                    break;
+
+                case '5':
+                    break;
+
+                default:
+                    
+                    break;
+            }
+
+
+
+
+
+            using (var db = new webshoppenContext())
+            {
+                
             }
         }
 
