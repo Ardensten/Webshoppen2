@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Webshoppen2.Models;
@@ -57,7 +58,13 @@ namespace Webshoppen2.AllMethods
 
         private static void ChangeCustomerInfo()
         {
-
+            using (var db = new webshoppenContext())
+            {
+                foreach (var c in db.Customers)
+                {
+                    Console.Write($"{c.Name}\t{c.SocialSecurityNumber}");
+                }
+            }
         }
 
         private static void AddCategory()
