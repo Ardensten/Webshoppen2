@@ -96,12 +96,8 @@ namespace Webshoppen2.Models
                     Console.ForegroundColor= ConsoleColor.Green;
                     Console.WriteLine($"\nList of beers. Enjoy!");
                     Console.ResetColor();
-                    Console.Write($" - [ID: {p.Id}] {p.Name}, Info: {p.InfoText} Price: {p.Price}SEK, from the company");
-                    foreach (var s in db.Suppliers)
-                    {
-                        Console.WriteLine($" {s.Name}.");
-                    }
-
+                    var inStock = p.UnitsInStock > 0 ? "In stock." : "Out of stock.";
+                    Console.Write($" - [ID: {p.Id}] {p.Name}\tPrice: {p.Price}SEK \t\t{inStock}");
                 }
                 Console.WriteLine();
             }
