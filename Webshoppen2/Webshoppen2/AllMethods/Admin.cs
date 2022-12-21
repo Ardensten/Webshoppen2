@@ -13,6 +13,9 @@ namespace Webshoppen2.AllMethods
         internal static void Menu()
         {
             Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("\t\t\t\t     _    ____  __  __ ___ _   _ \r\n\t\t\t\t    / \\  |  _ \\|  \\/  |_ _| \\ | |\r\n\t\t\t\t   / _ \\ | | | | |\\/| || ||  \\| |\r\n\t\t\t\t  / ___ \\| |_| | |  | || || |\\  |\r\n\t\t\t\t /_/   \\_\\____/|_|  |_|___|_| \\_|\r\n\n");
+            Console.ResetColor();
             Console.WriteLine($"[1] Add a product."
                 + "\n[2] Change a product."
                 + "\n[3] Delete a product."
@@ -85,22 +88,24 @@ namespace Webshoppen2.AllMethods
 
         private static void AddProduct()
         {
-            Console.WriteLine("Enter product name: ");
+            
+            Console.WriteLine("\nEnter product name: ");
             string name = Console.ReadLine();
-            Console.WriteLine("Enter product price: ");
-            var price = Convert.ToDouble(Console.ReadLine());
-            Console.WriteLine("Enter product supplier-id: ");
-            int supplierId = Convert.ToInt32(Console.ReadLine());
-            //ShowListSupplier();
+            Console.WriteLine("\nEnter product price: ");
+            double price = 0; price = Methods.TryNumberDouble();
+            Console.WriteLine("\nEnter product supplier-id: ");
+            ShowListSupplier();
+            Console.SetCursorPosition(0, 21);
+            int supplierId = 0; supplierId = Methods.TryNumberInt();
 
-            Console.WriteLine("Enter product category-id: ");
-            int categoryId = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine("\nEnter product category-id: ");
+            int categoryId = 0; categoryId = Methods.TryNumberInt();
             //ShowListCategory();
 
-            Console.WriteLine("Enter product information text: ");
+            Console.WriteLine("\nEnter product information text: ");
             var infotext = Console.ReadLine();
-            Console.WriteLine("Enter number of products in stock: ");
-            int unitsInStock = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine("\nEnter number of products in stock: ");
+            int unitsInStock = 0; unitsInStock = Methods.TryNumberInt();
 
             using (var db = new webshoppenContext())
             {
@@ -116,6 +121,26 @@ namespace Webshoppen2.AllMethods
                 var productList = db.Products;
                 productList.Add(newProduct);
                 db.SaveChanges();
+            }
+        }
+
+        private static void ShowListSupplier()
+        {
+            using (var db = new webshoppenContext())
+            {
+                var suppliers = db.Suppliers;
+                int i = 20;
+                Console.SetCursorPosition(80, i);
+                Console.ForegroundColor= ConsoleColor.Green;
+                Console.WriteLine("Suppliers list.");
+                Console.ResetColor();
+                foreach (var s in suppliers)
+                {
+                    i++;
+                    Console.SetCursorPosition(80, i);
+                    Console.WriteLine($"{s.Id} {s.Name} ");
+                }
+                
             }
         }
 
@@ -136,10 +161,11 @@ namespace Webshoppen2.AllMethods
             }
         }
 
+
         public static void EditProduct()
         {
             Console.WriteLine("Input id of product you want to edit");
-            var productId = Convert.ToInt32(Console.ReadLine());
+            var productId = 0; productId = Methods.TryNumberInt();
 
             Console.WriteLine("What do you want to edit?\n" +
                 "[1] : Name\n" +
@@ -169,7 +195,7 @@ namespace Webshoppen2.AllMethods
 
                     case '2':
                         Console.WriteLine("Enter the updated price: ");
-                        var newPrice = Convert.ToDouble(Console.ReadLine());
+                        var newPrice = 0; Methods.TryNumberDouble();
                         product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
 
                         if (product != null)
@@ -193,7 +219,7 @@ namespace Webshoppen2.AllMethods
 
                     case '4':
                         Console.WriteLine("Enter the updated amount of units in stock: ");
-                        var newUnitsInStock = Convert.ToInt32(Console.ReadLine());
+                        var newUnitsInStock = 0; newUnitsInStock = Methods.TryNumberInt();
                         product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
 
                         if (product != null)

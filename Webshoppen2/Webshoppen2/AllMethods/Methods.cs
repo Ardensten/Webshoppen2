@@ -54,13 +54,13 @@ namespace Webshoppen2.Models
             Console.WriteLine($"Name: ");
             string name = Console.ReadLine();
             Console.WriteLine("Social security number: ");
-            int socialSecurityNumber = Convert.ToInt32(Console.ReadLine());
+            int socialSecurityNumber = 0; socialSecurityNumber = TryNumberInt();
             Console.WriteLine("Phone number: ");
-            int phoneNumber = Convert.ToInt32(Console.ReadLine());
+            int phoneNumber = 0; phoneNumber = TryNumberInt();
             Console.WriteLine("Email: ");
             string email = Console.ReadLine();
             Console.WriteLine("CityID: ");
-            int cityId = Convert.ToInt32(Console.ReadLine());
+            int cityId = 0; cityId = TryNumberInt();
             Console.WriteLine("Adress: ");
             string adress = Console.ReadLine();
 
@@ -85,15 +85,15 @@ namespace Webshoppen2.Models
         {
             Console.WriteLine("Please enter your social security number (YYYYMMDDXXXX): ");
             int socialSecurityNumber = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Log in with your BankID");
-            Thread.Sleep(1000);
-            Console.Write(".");
-            Thread.Sleep(1000);
-            Console.Write(".");
-            Thread.Sleep(1000);
-            Console.WriteLine(".");
-            Console.WriteLine("Login successful!");
-            Console.ReadKey();
+            //Console.WriteLine("Log in with your BankID");
+            //Thread.Sleep(1000);
+            //Console.Write(".");
+            //Thread.Sleep(1000);
+            //Console.Write(".");
+            //Thread.Sleep(1000);
+            //Console.WriteLine(".");
+            //Console.WriteLine("Login successful!");
+            //Console.ReadKey();
 
             StartPage(socialSecurityNumber);
 
@@ -110,19 +110,24 @@ namespace Webshoppen2.Models
                 using (var db = new webshoppenContext())
                 {
                     var customerName = db.Customers.Where(x => x.SocialSecurityNumber == socialSecurityNumber).Select(x => x.Name).FirstOrDefault();
-                Console.WriteLine($"\n\t\t  Welcome {customerName} to our beautiful webshop! Here can you buy spirits and get wasted!\n\n"
-                    + "\n1. Categories."
-                    + "\n2. Search products."
-                    + "\n3. Cart");
-                }
+                    Console.WriteLine($"\n\t\t  Welcome {customerName} to our beautiful webshop! Here can you buy spirits and get wasted!\n\n");
+                    Console.WriteLine("\t\t\t\t\t\tRecommended products: ");
 
-                Console.WriteLine("Reccomended products: ");
-                using (var db = new webshoppenContext())
-                {
+
+                    int i = 0;
                     foreach (var p in db.Products.Where(p => p.ChosenProduct == true))
                     {
-                        Console.Write($"{p.Name}\tPrice: {p.Price}SEK");
+                        Console.Write("\t\t\t\t \t\t\t  _\r\n \t\t\t\t\t\t\t {_}\r\n \t\t\t\t\t\t\t |(|\r\n\t\t\t\t\t\t\t |=|\r\n\t\t\t\t\t\t\t/   \\\t\t\t\t\t  [-] \r\n\t\t.~~~~.\t\t\t\t\t|.--| \t\t\t\t\t.-'-'-. \r\n\t\ti====i_\t\t\t\t\t||  |\t\t\t\t\t:-...-: \r\n\t\t|cccc|_)\t\t\t\t||  |\t\t\t\t\t|;:   | \r\n\t\t|cccc|   \t\t\t\t|'--|\t\t\t\t\t|;:.._|\r\n\t\t`-==-'\t\t\t\t\t'-=-'\t\t\t\t\t`-...-'");
+                        Console.Write($"\n{p.Name}\tPrice: {p.Price}SEK \t\n");
+                        i++;
+                        if (i >= 3)
+                        {
+                            break;
+                        }
                     }
+
+                    Console.WriteLine("\n\n\t\t1. Categories \t\t\t2. Search products \t\t\t3. Cart");
+
                 }
 
                 ConsoleKeyInfo key = Console.ReadKey(true);
@@ -297,6 +302,44 @@ namespace Webshoppen2.Models
             {
                 InputInstructions();
             }
+        }
+
+        internal static double TryNumberDouble()
+        {
+            double number = 0;
+            bool correctInput = false;
+
+            while (!correctInput)
+            {
+                if (!double.TryParse(Console.ReadLine(), out number))
+                {
+                    Console.WriteLine("Wrong input! Need a number.");
+                }
+                else
+                {
+                    correctInput = true;
+                }
+            }
+            return number;
+        }
+
+        internal static int TryNumberInt()
+        {
+            int number = 0;
+            bool correctInput = false;
+
+            while (!correctInput)
+            {
+                if (!int.TryParse(Console.ReadLine(), out number))
+                {
+                    Console.WriteLine("Wrong input! Need a number.");
+                }
+                else
+                {
+                    correctInput = true;
+                }
+            }
+            return number;
         }
 
         internal static void InputInstructions()
