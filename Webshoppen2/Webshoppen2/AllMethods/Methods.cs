@@ -84,10 +84,10 @@ namespace Webshoppen2.Models
             }
         }
 
-        public static void UserLogIn()
+        public static void UserLogIn()  //Måste kolla så användaren finns!!
         {
             Console.WriteLine("Please enter your social security number (YYYYMMDDXXXX): ");
-            int socialSecurityNumber = Convert.ToInt32(Console.ReadLine());
+            long socialSecurityNumber = TryNumberLong();
             //Console.WriteLine("Log in with your BankID");
             //Thread.Sleep(1000);
             //Console.Write(".");
@@ -109,7 +109,7 @@ namespace Webshoppen2.Models
             StartPage(socialSecurityNumber);
         }
 
-        public static void StartPage(int socialSecurityNumber)
+        public static void StartPage(long socialSecurityNumber)
         {
             Console.Clear();
             while (true)
@@ -170,15 +170,15 @@ namespace Webshoppen2.Models
                             join p in db.Products on c.ProductId equals p.Id
                             join cu in db.Customers on c.CustomerId equals cu.Id
                             where cu.Id == loggedInId
-                            select new {Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits, CartProductId = c.ProductId, CartCustomerId = c.CustomerId}).ToList();
+                            select new { Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits, CartProductId = c.ProductId, CartCustomerId = c.CustomerId }).ToList();
                 foreach (var item in cart)
                 {
-                    Console.WriteLine($"{item.Name} {item.Price} {item.AmountofUnits}");
+                    Console.WriteLine($"{item.CartProductId} {item.Name} {item.Price} {item.AmountofUnits}");
                 }
 
                 Console.WriteLine("Where do you want to go?\n[E] : Edit your cart \n[C] : Checkout\n[B] : Back to categories");
                 var choice = Console.ReadLine();
-                if(choice == "e")
+                if (choice == "e")
                 {
                     Console.WriteLine("-----------------------------");
                     Console.WriteLine("[1] : Change amount of a product \n[2] : Remove a product from your cart");
@@ -188,47 +188,32 @@ namespace Webshoppen2.Models
                         case '1':
                             Console.WriteLine("Which product do you want to change the amount of?");
                             int productId = TryNumberInt();
-                            Console.WriteLine("How many do you want to add?");
+                            Console.WriteLine("Enter the number you want in cart.");
                             int productAmount = TryNumberInt();
 
                             var product = db.Products.Where(p => p.Id == productId);
+                            var changeCart = db.Carts.Where(p => p.CustomerId == loggedInId);
 
-                            //for (int i = 0; i > cart.Count(); i++)
-                            //{
-                            //    if (productId == cart.CartProductId && loggedInId == cart.CartCustomerId)
-                            //    {
-                            //        carts.AmountofUnits = productAmount;
-                            //    }
-                            //}
+                            foreach (var c in changeCart)
+                            {
+                                if (productId == c.ProductId && loggedInId == c.CustomerId)
+                                {
+                                    c.AmountofUnits = productAmount;
+                                }
 
-                            //foreach (var carts in cart)
-                            //{
-                            //    foreach (var products in product)
-                            //    {
-                            //        if (productId == carts.CartProductId && loggedInId == carts.CartCustomerId)
-                            //        {
-                            //            carts.AmountofUnits = productAmount;
-                            //        }
-
-                            //    }
-                            //}
-
-                            
-                            
-                            
-                            
-                            
+                            }
+                            db.SaveChanges();
 
                             break;
                     }
-                        
+
                 }
 
-                else if(choice == "c")
+                else if (choice == "c")
                 {
                     Checkout();
                 }
-                else if(choice == "b")
+                else if (choice == "b")
                 {
                     Categories();
                 }
@@ -236,7 +221,7 @@ namespace Webshoppen2.Models
                 {
                     InputInstructions();
                 }
-                
+
             }
         }
 
