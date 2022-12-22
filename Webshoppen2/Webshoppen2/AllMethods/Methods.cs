@@ -9,6 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Webshoppen2.AllMethods;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Dapper;
+using Microsoft.Data.SqlClient;
 
 namespace Webshoppen2.Models
 {
@@ -148,7 +151,7 @@ namespace Webshoppen2.Models
                         Categories();
                         break;
                     case '2':
-                        //Search();
+                        Search();
                         break;
                     case '3':
                         ShowCart();
@@ -160,6 +163,27 @@ namespace Webshoppen2.Models
                 Console.ReadKey(true);
                 Console.Clear();
             }
+        }
+
+        private static void Search()  //Dapper
+        {
+            string connstring = "Server=tcp:grupp3skola.database.windows.net,1433;Initial Catalog=webshoppen;Persist Security Info=False;User ID=grupp3admin;Password=NUskavikoda1234;MultipleActiveResultSets=True;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+            Console.WriteLine("\nType your search.");
+            var search = Console.ReadLine();
+            var sql = $"SELECT * FROM Product WHERE Name like '%{search}%'";
+            var beers = new List<Models.Product>();
+
+            using (var db = new SqlConnection(connstring))
+            {
+                beers = db.Query<Models.Product>(sql).ToList();
+            }
+
+            Console.WriteLine();
+            foreach(var b in beers)
+            {
+                Console.WriteLine($"{b.Price}Sek, \t\t{b.Name}");
+            }
+            Console.ReadLine();
         }
 
         private static void ShowCart() //Lägg till en loop för för processen
