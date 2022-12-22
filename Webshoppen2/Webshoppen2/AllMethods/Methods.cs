@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -161,7 +162,7 @@ namespace Webshoppen2.Models
             }
         }
 
-        private static void ShowCart()
+        private static void ShowCart() //Lägg till en loop för för processen
         {
             using (var db = new webshoppenContext())
             {
@@ -169,11 +170,81 @@ namespace Webshoppen2.Models
                             join p in db.Products on c.ProductId equals p.Id
                             join cu in db.Customers on c.CustomerId equals cu.Id
                             where cu.Id == loggedInId
-                            select new {Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits}).ToList();
+                            select new {Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits, CartProductId = c.ProductId, CartCustomerId = c.CustomerId}).ToList();
                 foreach (var item in cart)
                 {
                     Console.WriteLine($"{item.Name} {item.Price} {item.AmountofUnits}");
                 }
+
+                Console.WriteLine("Where do you want to go?\n[E] : Edit your cart \n[C] : Checkout\n[B] : Back to categories");
+                var choice = Console.ReadLine();
+                if(choice == "e")
+                {
+                    Console.WriteLine("-----------------------------");
+                    Console.WriteLine("[1] : Change amount of a product \n[2] : Remove a product from your cart");
+                    ConsoleKeyInfo key = Console.ReadKey(true);
+                    switch (key.KeyChar)
+                    {
+                        case '1':
+                            Console.WriteLine("Which product do you want to change the amount of?");
+                            int productId = TryNumberInt();
+                            Console.WriteLine("How many do you want to add?");
+                            int productAmount = TryNumberInt();
+
+                            var product = db.Products.Where(p => p.Id == productId);
+
+                            //for (int i = 0; i > cart.Count(); i++)
+                            //{
+                            //    if (productId == cart.CartProductId && loggedInId == cart.CartCustomerId)
+                            //    {
+                            //        carts.AmountofUnits = productAmount;
+                            //    }
+                            //}
+
+                            //foreach (var carts in cart)
+                            //{
+                            //    foreach (var products in product)
+                            //    {
+                            //        if (productId == carts.CartProductId && loggedInId == carts.CartCustomerId)
+                            //        {
+                            //            carts.AmountofUnits = productAmount;
+                            //        }
+
+                            //    }
+                            //}
+
+                            
+                            
+                            
+                            
+                            
+
+                            break;
+                    }
+                        
+                }
+
+                else if(choice == "c")
+                {
+                    Checkout();
+                }
+                else if(choice == "b")
+                {
+                    Categories();
+                }
+                else
+                {
+                    InputInstructions();
+                }
+                
+            }
+        }
+
+        public static void Checkout()
+        {
+            using (var db = new webshoppenContext())
+            {
+
             }
         }
 
@@ -190,6 +261,7 @@ namespace Webshoppen2.Models
                     {
                         Console.WriteLine($"[{p.Id}] : {p.Name}");
                     }
+                    Console.WriteLine("[Q] : Go back to start");
                 }
                 Console.WriteLine("Input the category-id you wish to view: ");
                 ConsoleKeyInfo key = Console.ReadKey(true);
@@ -220,6 +292,9 @@ namespace Webshoppen2.Models
                         ShowAllCider();
                         Console.WriteLine("Choose a cider: ");
                         ShowInfoOnProduct();
+                        break;
+                    case 'q':
+                        runCategories = false;
                         break;
                     default:
                         InputInstructions();
@@ -343,17 +418,20 @@ namespace Webshoppen2.Models
             }
         }
 
-        private static void AddProductToCart(int chosenNumber)
+        private static void AddProductToCart(int chosenNumber) //Vi måste felsäkra så man inte kan lägga till mer än vad det finns tillgängligt i lagret
         {
             using (var db = new webshoppenContext())
             {
+                Console.WriteLine("How many do you want to add to your cart?");
+                int amountOfUnits = TryNumberInt();
+
                 var product = db.Products.Where(p => p.Id == chosenNumber).ToList();
                 foreach (var p in product)
                 {
                     var cart = new Cart
                     {
                         ProductId = chosenNumber,
-                        AmountofUnits = 1,
+                        AmountofUnits = amountOfUnits,
                         CustomerId = loggedInId
                     };
                     var cartList = db.Carts;
