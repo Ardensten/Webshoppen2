@@ -147,7 +147,7 @@ namespace Webshoppen2.AllMethods
         public static void RemoveProduct()
         {
             Console.WriteLine("Input id of product you want to delete");
-            var productId = Convert.ToInt32(Console.ReadLine());
+            var productId = 0; productId = Methods.TryNumberInt();
 
             using (var db = new webshoppenContext())
             {

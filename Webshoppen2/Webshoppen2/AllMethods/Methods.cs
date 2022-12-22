@@ -54,7 +54,7 @@ namespace Webshoppen2.Models
             Console.WriteLine($"Name: ");
             string name = Console.ReadLine();
             Console.WriteLine("Social security number: ");
-            int socialSecurityNumber = 0; socialSecurityNumber = TryNumberInt();
+            long socialSecurityNumber = 0; socialSecurityNumber = TryNumberLong();
             Console.WriteLine("Phone number: ");
             int phoneNumber = 0; phoneNumber = TryNumberInt();
             Console.WriteLine("Email: ");
@@ -81,7 +81,7 @@ namespace Webshoppen2.Models
             }
         }
 
-        public static void UserLogIn()
+        public static int UserLogIn()
         {
             Console.WriteLine("Please enter your social security number (YYYYMMDDXXXX): ");
             int socialSecurityNumber = Convert.ToInt32(Console.ReadLine());
@@ -96,6 +96,7 @@ namespace Webshoppen2.Models
             //Console.ReadKey();
 
             StartPage(socialSecurityNumber);
+            return socialSecurityNumber;
 
         }
 
@@ -174,7 +175,7 @@ namespace Webshoppen2.Models
                     case '1':
                         ShowAllBeer();
                         Console.WriteLine("Choose a beer: ");
-                        CartChoice();
+                        ShowInfoOnProduct();
                         break;
                     case '2':
                         ShowAllWine();
@@ -203,6 +204,20 @@ namespace Webshoppen2.Models
 
                 Console.ReadKey();
                 Console.Clear();
+            }
+        }
+
+        private static void ShowInfoOnProduct()
+        {
+            Console.WriteLine("Choose product-Id to see more.");
+            int chooseNumber = 0; chooseNumber = Methods.TryNumberInt();
+            using (var db = new webshoppenContext())
+            {
+                foreach(var p in db.Products.Where(y => y.Id == chooseNumber).Include(x => x.Supplier).Include(c => c.Supplier.City))
+                {
+                    Console.WriteLine($"{p.Name} - {p.Price} - {p.InfoText} - {p.Supplier.Name} - {p.Supplier.City.Name}");
+                }
+                AddProductToCart(chooseNumber);
             }
         }
 
@@ -304,6 +319,24 @@ namespace Webshoppen2.Models
             }
         }
 
+        private static void AddProductToCart(int chosenNumber)
+        {
+           
+            using (var db = new webshoppenContext())
+            {
+                var product = db.Products.Where(p => p.Id == chosenNumber).ToList();
+                foreach(var p in product)
+                {
+                    var cart = new Cart
+                    {
+                        ProductId = chosenNumber,
+                        NoOfUnits = 1,
+                    };
+           
+                }
+            }
+        }
+
         internal static double TryNumberDouble()
         {
             double number = 0;
@@ -331,6 +364,25 @@ namespace Webshoppen2.Models
             while (!correctInput)
             {
                 if (!int.TryParse(Console.ReadLine(), out number))
+                {
+                    Console.WriteLine("Wrong input! Need a number.");
+                }
+                else
+                {
+                    correctInput = true;
+                }
+            }
+            return number;
+        }
+
+        internal static long TryNumberLong()
+        {
+            long number = 0;
+            bool correctInput = false;
+
+            while (!correctInput)
+            {
+                if (!long.TryParse(Console.ReadLine(), out number))
                 {
                     Console.WriteLine("Wrong input! Need a number.");
                 }

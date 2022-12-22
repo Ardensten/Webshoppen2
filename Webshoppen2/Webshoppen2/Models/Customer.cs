@@ -7,7 +7,7 @@ namespace Webshoppen2.Models
     {
         public int Id { get; set; }
         public string? Name { get; set; }
-        public int? SocialSecurityNumber { get; set; }
+        public long? SocialSecurityNumber { get; set; }
         public int? PhoneNumber { get; set; }
         public string? Email { get; set; }
         public int? CityId { get; set; }

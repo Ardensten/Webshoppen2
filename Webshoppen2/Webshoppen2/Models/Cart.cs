@@ -7,6 +7,7 @@ namespace Webshoppen2.Models
     {
         public int Id { get; set; }
         public int? ProductId { get; set; }
+        public int? NoOfUnits { get; set; }
         public int? CustomerId { get; set; }
     }
 }
