@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -12,6 +13,7 @@ namespace Webshoppen2.Models
 {
     internal class Methods
     {
+        static int loggedInId;
         internal static void Running()
         {
             Console.Clear();
@@ -81,7 +83,7 @@ namespace Webshoppen2.Models
             }
         }
 
-        public static int UserLogIn()
+        public static void UserLogIn()
         {
             Console.WriteLine("Please enter your social security number (YYYYMMDDXXXX): ");
             int socialSecurityNumber = Convert.ToInt32(Console.ReadLine());
@@ -95,9 +97,15 @@ namespace Webshoppen2.Models
             //Console.WriteLine("Login successful!");
             //Console.ReadKey();
 
+            using (var db = new webshoppenContext())
+            {
+                var id = db.Customers.Where(i => i.SocialSecurityNumber == socialSecurityNumber);
+                foreach (var i in id)
+                {
+                    loggedInId = i.Id;
+                }
+            }
             StartPage(socialSecurityNumber);
-            return socialSecurityNumber;
-
         }
 
         public static void StartPage(int socialSecurityNumber)
@@ -142,7 +150,7 @@ namespace Webshoppen2.Models
                         //Search();
                         break;
                     case '3':
-                        //ShowCart();
+                        ShowCart();
                         break;
                     default:
                         InputInstructions();
@@ -150,6 +158,22 @@ namespace Webshoppen2.Models
                 }
                 Console.ReadKey(true);
                 Console.Clear();
+            }
+        }
+
+        private static void ShowCart()
+        {
+            using (var db = new webshoppenContext())
+            {
+                var cart = (from c in db.Carts
+                            join p in db.Products on c.ProductId equals p.Id
+                            join cu in db.Customers on c.CustomerId equals cu.Id
+                            where cu.Id == loggedInId
+                            select new {Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits}).ToList();
+                foreach (var item in cart)
+                {
+                    Console.WriteLine($"{item.Name} {item.Price} {item.AmountofUnits}");
+                }
             }
         }
 
@@ -180,22 +204,22 @@ namespace Webshoppen2.Models
                     case '2':
                         ShowAllWine();
                         Console.WriteLine("Choose a wine: ");
-                        CartChoice();
+                        ShowInfoOnProduct();
                         break;
                     case '3':
                         ShowAllSpirits();
                         Console.WriteLine("Choose spirits: ");
-                        CartChoice();
+                        ShowInfoOnProduct();
                         break;
                     case '4':
                         ShowAllChampagne();
                         Console.WriteLine("Choose a champagne: ");
-                        CartChoice();
+                        ShowInfoOnProduct();
                         break;
                     case '5':
                         ShowAllCider();
                         Console.WriteLine("Choose a cider: ");
-                        CartChoice();
+                        ShowInfoOnProduct();
                         break;
                     default:
                         InputInstructions();
@@ -210,15 +234,15 @@ namespace Webshoppen2.Models
         private static void ShowInfoOnProduct()
         {
             Console.WriteLine("Choose product-Id to see more.");
-            int chooseNumber = 0; chooseNumber = Methods.TryNumberInt();
+            int choosenNumber = 0; choosenNumber = Methods.TryNumberInt();
             using (var db = new webshoppenContext())
             {
-                foreach(var p in db.Products.Where(y => y.Id == chooseNumber).Include(x => x.Supplier).Include(c => c.Supplier.City))
+                foreach (var p in db.Products.Where(y => y.Id == choosenNumber).Include(x => x.Supplier).Include(c => c.Supplier.City))
                 {
                     Console.WriteLine($"{p.Name} - {p.Price} - {p.InfoText} - {p.Supplier.Name} - {p.Supplier.City.Name}");
                 }
-                AddProductToCart(chooseNumber);
             }
+            CartChoice(choosenNumber);
         }
 
         private static void ShowAllChampagne()  //slå ihop alla metoder och ta categori id som en inparameter!!!!!!!!!!!!!!!!!!
@@ -300,14 +324,14 @@ namespace Webshoppen2.Models
             }
         }
 
-        internal static void CartChoice()
+        internal static void CartChoice(int chosenNumber)
         {
 
             Console.WriteLine("Add to cart?");
             var choice = Console.ReadLine();
             if (choice == "y")
             {
-                //AddProductToCart();
+                AddProductToCart(chosenNumber);
             }
             else if (choice == "n")
             {
@@ -321,18 +345,20 @@ namespace Webshoppen2.Models
 
         private static void AddProductToCart(int chosenNumber)
         {
-           
             using (var db = new webshoppenContext())
             {
                 var product = db.Products.Where(p => p.Id == chosenNumber).ToList();
-                foreach(var p in product)
+                foreach (var p in product)
                 {
                     var cart = new Cart
                     {
                         ProductId = chosenNumber,
-                        NoOfUnits = 1,
+                        AmountofUnits = 1,
+                        CustomerId = loggedInId
                     };
-           
+                    var cartList = db.Carts;
+                    cartList.Add(cart);
+                    db.SaveChanges();
                 }
             }
         }
