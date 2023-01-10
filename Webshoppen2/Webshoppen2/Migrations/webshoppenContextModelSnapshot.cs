@@ -151,7 +151,7 @@ namespace Webshoppen2.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int?>("CartId")
+                    b.Property<int>("CheckoutCartOrderId")
                         .HasColumnType("int");
 
                     b.Property<int?>("ShippingInfoId")

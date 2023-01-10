@@ -179,33 +179,34 @@ namespace Webshoppen2.Models
             }
 
             Console.WriteLine();
-            foreach(var b in beers)
+            foreach (var b in beers)
             {
                 Console.WriteLine($"{b.Price}Sek, \t\t{b.Name}");
             }
             Console.ReadLine();
         }
 
-        private static void ShowCart() //Lägg till en loop för för processen
+        private static double ShowCart() //Lägg till en loop för för processen
         {
+            double? totalCostOfCart = 0;
+
             using (var db = new webshoppenContext())
             {
                 var cart = (from c in db.Carts
                             join p in db.Products on c.ProductId equals p.Id
                             join cu in db.Customers on c.CustomerId equals cu.Id
                             where cu.Id == loggedInId
-                            select new { Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id,  CartProductId = c.ProductId, CartCustomerId = c.CustomerId }).ToList();
-               
-                double? totalCostOfCart = 0;
+                            select new { Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId }).ToList();
+
 
                 Console.WriteLine();
                 foreach (var item in cart)
                 {
                     Console.WriteLine($"{item.CartId} {item.Name} {item.Price} {item.AmountofUnits}");
                     double? totalPerCartId = Convert.ToDouble(item.AmountofUnits) * item.Price;
-                    totalCostOfCart += totalPerCartId;                  
+                    totalCostOfCart += totalPerCartId;
                 }
-                Console.ForegroundColor= ConsoleColor.Green;
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"\n\nTotal cost of cart: {totalCostOfCart}\n\n");
                 Console.ResetColor();
 
@@ -244,7 +245,7 @@ namespace Webshoppen2.Models
 
                 else if (choice == "c")
                 {
-                    Checkout();
+                    Checkout((double)totalCostOfCart);
                 }
                 else if (choice == "b")
                 {
@@ -256,9 +257,10 @@ namespace Webshoppen2.Models
                 }
 
             }
+            return (double)totalCostOfCart; 
         }
 
-        public static void Checkout()
+        public static void Checkout(double totalCostOfCart)
         {
 
             Console.Clear();
@@ -268,11 +270,31 @@ namespace Webshoppen2.Models
             using (var db = new webshoppenContext())
             {
 
-                var checkout = (from c in db.Carts
-                            join p in db.Products on c.ProductId equals p.Id
-                            join cu in db.Customers on c.CustomerId equals cu.Id
-                            where cu.Id == loggedInId
-                            select new {Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId }).ToList();
+
+                //var checkout = (from c in db.Carts
+                //                join p in db.Products on c.ProductId equals p.Id
+                //                join cu in db.Customers on c.CustomerId equals cu.Id
+                //                join ch in db.
+                //                where cu.Id == loggedInId
+                //                select new { Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId }).ToList();
+                
+                //Random rnd = new Random();
+                //var randomOrderId = rnd.Next(0, 1000000).ToString() + loggedInId.ToString();
+
+                //foreach (var c in checkout)
+                //{
+                //    var newCheckoutCart = new CheckoutCart
+                //    {
+                //        OrderId = float.Parse(randomOrderId),
+                //        ProductId = c.CartProductId,
+                //        AmountofUnits = c.AmountofUnits,
+                //        CustomerId = c.CartCustomerId,
+                //    };
+                //    var newCheckoutCartList = db.;
+                //    newCheckoutCartList.Add();
+                //    db.SaveChanges();
+                //}
+
 
                 //var parcelChoise = (from s in db.ShippingInfos
                 //                    join cu in db.Customers on s.CustomerId equals cu.Id
@@ -281,20 +303,17 @@ namespace Webshoppen2.Models
 
                 var checkoutCart = db.Carts.Where(p => p.CustomerId == loggedInId);
 
+                Console.WriteLine();
                 Console.WriteLine("Choose shipping method: ");
-                Console.WriteLine("[P]ostnord || [D]HL");
+                Console.WriteLine("[P]ostnord 49 SEK || [D]HL 99 SEK");
                 var choice = Console.ReadLine();
                 if (choice == "P" || choice == "p")
                 {
-
-
-
-
-
+                    totalCostOfCart += 49;
                     var newParcel = new OrderHistory
                     {
                         ShippingInfoId = 1,
-                        
+
                     };
                     var orderHistoryList = db.OrderHistories;
                     orderHistoryList.Add(newParcel);
@@ -302,6 +321,7 @@ namespace Webshoppen2.Models
                 }
                 else if (choice == "D" || choice == "d")
                 {
+                    totalCostOfCart += 99;
                     var newParcel = new OrderHistory
                     {
                         ShippingInfoId = 2
@@ -310,6 +330,7 @@ namespace Webshoppen2.Models
                     orderHistoryList.Add(newParcel);
                     db.SaveChanges();
                 }
+
 
             }
         }
