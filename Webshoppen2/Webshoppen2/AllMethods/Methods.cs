@@ -194,11 +194,20 @@ namespace Webshoppen2.Models
                             join p in db.Products on c.ProductId equals p.Id
                             join cu in db.Customers on c.CustomerId equals cu.Id
                             where cu.Id == loggedInId
-                            select new { Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits, CartProductId = c.ProductId, CartCustomerId = c.CustomerId }).ToList();
+                            select new { Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id,  CartProductId = c.ProductId, CartCustomerId = c.CustomerId }).ToList();
+               
+                double? totalCostOfCart = 0;
+
+                Console.WriteLine();
                 foreach (var item in cart)
                 {
-                    Console.WriteLine($"{item.CartProductId} {item.Name} {item.Price} {item.AmountofUnits}");
+                    Console.WriteLine($"{item.CartId} {item.Name} {item.Price} {item.AmountofUnits}");
+                    double? totalPerCartId = Convert.ToDouble(item.AmountofUnits) * item.Price;
+                    totalCostOfCart += totalPerCartId;                  
                 }
+                Console.ForegroundColor= ConsoleColor.Green;
+                Console.WriteLine($"\n\nTotal cost of cart: {totalCostOfCart}\n\n");
+                Console.ResetColor();
 
                 Console.WriteLine("Where do you want to go?\n[E] : Edit your cart \n[C] : Checkout\n[B] : Back to categories");
                 var choice = Console.ReadLine();
@@ -211,16 +220,16 @@ namespace Webshoppen2.Models
                     {
                         case '1':
                             Console.WriteLine("Which product do you want to change the amount of?");
-                            int productId = TryNumberInt();
+                            int cartProductId = TryNumberInt();
                             Console.WriteLine("Enter the number you want in cart.");
                             int productAmount = TryNumberInt();
 
-                            var product = db.Products.Where(p => p.Id == productId);
+                            var product = db.Carts.Where(p => p.Id == cartProductId);
                             var changeCart = db.Carts.Where(p => p.CustomerId == loggedInId);
 
                             foreach (var c in changeCart)
                             {
-                                if (productId == c.ProductId && loggedInId == c.CustomerId)
+                                if (cartProductId == c.Id && loggedInId == c.CustomerId)
                                 {
                                     c.AmountofUnits = productAmount;
                                 }
@@ -251,8 +260,56 @@ namespace Webshoppen2.Models
 
         public static void Checkout()
         {
+
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine("   ____ _               _               _   \r\n  / ___| |__   ___  ___| | _____  _   _| |_ \r\n | |   | '_ \\ / _ \\/ __| |/ / _ \\| | | | __|\r\n | |___| | | |  __/ (__|   < (_) | |_| | |_ \r\n  \\____|_| |_|\\___|\\___|_|\\_\\___/ \\__,_|\\__|");
+            Console.ResetColor();
             using (var db = new webshoppenContext())
             {
+
+                var checkout = (from c in db.Carts
+                            join p in db.Products on c.ProductId equals p.Id
+                            join cu in db.Customers on c.CustomerId equals cu.Id
+                            where cu.Id == loggedInId
+                            select new {Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId }).ToList();
+
+                //var parcelChoise = (from s in db.ShippingInfos
+                //                    join cu in db.Customers on s.CustomerId equals cu.Id
+                //                    where cu.Id == loggedInId
+                //                    select new { Customer = cu.Id, ParcelServiceName = s.ParcelServiceName });
+
+                var checkoutCart = db.Carts.Where(p => p.CustomerId == loggedInId);
+
+                Console.WriteLine("Choose shipping method: ");
+                Console.WriteLine("[P]ostnord || [D]HL");
+                var choice = Console.ReadLine();
+                if (choice == "P" || choice == "p")
+                {
+
+
+
+
+
+                    var newParcel = new OrderHistory
+                    {
+                        ShippingInfoId = 1,
+                        
+                    };
+                    var orderHistoryList = db.OrderHistories;
+                    orderHistoryList.Add(newParcel);
+                    db.SaveChanges();
+                }
+                else if (choice == "D" || choice == "d")
+                {
+                    var newParcel = new OrderHistory
+                    {
+                        ShippingInfoId = 2
+                    };
+                    var orderHistoryList = db.OrderHistories;
+                    orderHistoryList.Add(newParcel);
+                    db.SaveChanges();
+                }
 
             }
         }
@@ -303,6 +360,7 @@ namespace Webshoppen2.Models
                         ShowInfoOnProduct();
                         break;
                     case 'q':
+                    case 'Q':
                         runCategories = false;
                         break;
                     default:

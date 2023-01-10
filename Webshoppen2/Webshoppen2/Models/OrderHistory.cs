@@ -7,5 +7,6 @@ namespace Webshoppen2.Models
     {
         public int Id { get; set; }
         public int? CartId { get; set; }
+        public int? ShippingInfoId { get; set;}
     }
 }
