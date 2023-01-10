@@ -8,5 +8,8 @@ namespace Webshoppen2.Models
         public int Id { get; set; }
         public int CheckoutCartOrderId { get; set; }
         public int? ShippingInfoId { get; set;}
+        public string? ShippingAddress { get; set; }
+        public string? ShippingCity { get; set; }
+        public int? PaymentInfoId { get; set; }
     }
 }

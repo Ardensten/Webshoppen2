@@ -12,6 +12,7 @@ using Webshoppen2.AllMethods;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using Dapper;
 using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Webshoppen2.Models
 {
@@ -207,7 +208,6 @@ namespace Webshoppen2.Models
                         Console.WriteLine($"{item.CartId} {item.Name} {item.Price} {item.AmountofUnits}");
                         double? totalPerCartId = Convert.ToDouble(item.AmountofUnits) * item.Price;
                         totalCostOfCart += totalPerCartId;
-
                     }
                 }
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -264,7 +264,7 @@ namespace Webshoppen2.Models
             return (double)totalCostOfCart;
         }
 
-        public static void Checkout(double totalCostOfCart)
+        public static double Checkout(double totalCostOfCart)
         {
 
             Console.Clear();
@@ -273,8 +273,6 @@ namespace Webshoppen2.Models
             Console.ResetColor();
             using (var db = new webshoppenContext())
             {
-
-
                 var checkout = (from c in db.Carts
                                 join p in db.Products on c.ProductId equals p.Id
                                 join cu in db.Customers on c.CustomerId equals cu.Id
@@ -282,26 +280,20 @@ namespace Webshoppen2.Models
                                 select new { Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId, OrderId = c.OrderId }).ToList();
 
                 Random rnd = new Random();
-                var randomOrderId = rnd.Next(0, 1000000).ToString() + loggedInId.ToString();
-                float.Parse(randomOrderId);
+                var randomOrderId = rnd.Next(100000, 999999).ToString() + loggedInId.ToString();
 
-                foreach (var c in checkout)
+                var setOrderId = db.Carts.Where(p => p.CustomerId == loggedInId);
+
+                foreach (var s in setOrderId)
                 {
-                    if (c.CartCustomerId == loggedInId && c.OrderId == null)
+                    if (s.CustomerId == loggedInId && s.OrderId == null)
                     {
-                        //c.CartCustomerId = 1,
-                        //c.OrderId = randomOrderId;                       
+                        s.OrderId = float.Parse(randomOrderId);
                     }
                 }
                 db.SaveChanges();
 
-
-                //var parcelChoise = (from s in db.ShippingInfos
-                //                    join cu in db.Customers on s.CustomerId equals cu.Id
-                //                    where cu.Id == loggedInId
-                //                    select new { Customer = cu.Id, ParcelServiceName = s.ParcelServiceName });
-
-                var checkoutCart = db.Carts.Where(p => p.CustomerId == loggedInId);
+                //var checkoutCart = db.Carts.Where(p => p.CustomerId == loggedInId);
 
                 Console.WriteLine();
                 Console.WriteLine("Choose shipping method: ");
@@ -313,6 +305,7 @@ namespace Webshoppen2.Models
                     var newParcel = new OrderHistory
                     {
                         ShippingInfoId = 1,
+
 
                     };
                     var orderHistoryList = db.OrderHistories;
@@ -331,10 +324,72 @@ namespace Webshoppen2.Models
                     db.SaveChanges();
                 }
 
+                GetShippingInfo(totalCostOfCart);
+            }
+            return totalCostOfCart;
+        }
+        internal static void GetShippingInfo(double totalCostOfCart)
+        {
+            Console.WriteLine("Would you like to use your saved address as your shipping address? [y / n]");
+            var choice = Console.ReadLine();
 
+            if (choice == "y")
+            {
+                using (var db = new webshoppenContext())
+                {
+                    foreach (var c in db.Customers.Where(c => c.Id == loggedInId))
+                    {
+                        Console.Write($"{c.Name}\n{c.Adress}");
+                        var shippingAddress = db.OrderHistories.Where(x => x.ShippingInfoId == 1);
+                        foreach (var s in shippingAddress)
+                        {
+                            s.ShippingAddress = c.Adress;
+                        }
+                    }
+                    db.SaveChanges();
+                }
+            }
+            else if (choice == "n")
+            {
+                Console.WriteLine("Enter the city: ");
+                var newCity = Console.ReadLine();
+                Console.WriteLine("Enter the street-name: ");
+                var newStreetName = Console.ReadLine();
+
+                using (var db = new webshoppenContext())
+                {
+                    var shippingAddress = db.OrderHistories.Where(x => x.CheckoutCartOrderId != null).SingleOrDefault();
+                    if (shippingAddress != null)
+                    {
+                        shippingAddress.ShippingCity = newCity;
+                        shippingAddress.ShippingAddress = newStreetName;
+                        db.SaveChanges();
+                    }
+                }
+            }
+            PayCheckout(totalCostOfCart);
+        }
+        internal static void PayCheckout(double totalCostOfCart)
+        {
+            using (var db = new webshoppenContext())
+            {
+                var cart = (from c in db.Carts
+                            join p in db.Products on c.ProductId equals p.Id
+                            join cu in db.Customers on c.CustomerId equals cu.Id
+                            where cu.Id == loggedInId
+                            select new { Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId, OrderId = c.OrderId }).ToList();
+
+                Console.WriteLine();
+                foreach (var item in cart)
+                {
+                    if (item.OrderId == null)
+                    {
+                        Console.WriteLine($"{item.CartId} {item.Name} {item.Price} {item.AmountofUnits}");
+                    }
+                }
+                Console.WriteLine($"Total cost including shipping-cost and VAT: {totalCostOfCart}\nVAT: {totalCostOfCart * 0.25}");
             }
         }
-
         internal static void Categories()
         {
             Console.Clear();

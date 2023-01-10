@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Webshoppen2.Models;
 
@@ -11,9 +12,10 @@ using Webshoppen2.Models;
 namespace Webshoppen2.Migrations
 {
     [DbContext(typeof(webshoppenContext))]
-    partial class webshoppenContextModelSnapshot : ModelSnapshot
+    [Migration("20230110131716_Orderhistory")]
+    partial class Orderhistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -157,9 +159,6 @@ namespace Webshoppen2.Migrations
                     b.Property<int>("CheckoutCartOrderId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PaymentInfoId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ShippingAddress")
                         .HasColumnType("nvarchar(max)");
 
@@ -182,7 +181,13 @@ namespace Webshoppen2.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("Type")
+                    b.Property<int?>("CardNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Method")
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 

@@ -101,7 +101,7 @@ namespace Webshoppen2.Models
             {
                 entity.ToTable("PaymentInfo");
 
-                entity.Property(e => e.Method).HasMaxLength(30);
+                entity.Property(e => e.Type).HasMaxLength(30);
             });
 
             modelBuilder.Entity<Product>(entity =>
