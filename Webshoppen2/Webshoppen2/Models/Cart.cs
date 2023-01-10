@@ -9,5 +9,6 @@ namespace Webshoppen2.Models
         public int? ProductId { get; set; }
         public int? AmountofUnits { get; set; }
         public int? CustomerId { get; set; }
+        public float? OrderId { get; set; }
     }
 }

@@ -196,15 +196,19 @@ namespace Webshoppen2.Models
                             join p in db.Products on c.ProductId equals p.Id
                             join cu in db.Customers on c.CustomerId equals cu.Id
                             where cu.Id == loggedInId
-                            select new { Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId }).ToList();
+                            select new { Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId, OrderId = c.OrderId }).ToList();
 
 
                 Console.WriteLine();
                 foreach (var item in cart)
                 {
-                    Console.WriteLine($"{item.CartId} {item.Name} {item.Price} {item.AmountofUnits}");
-                    double? totalPerCartId = Convert.ToDouble(item.AmountofUnits) * item.Price;
-                    totalCostOfCart += totalPerCartId;
+                    if (item.OrderId == null)
+                    {
+                        Console.WriteLine($"{item.CartId} {item.Name} {item.Price} {item.AmountofUnits}");
+                        double? totalPerCartId = Convert.ToDouble(item.AmountofUnits) * item.Price;
+                        totalCostOfCart += totalPerCartId;
+
+                    }
                 }
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"\n\nTotal cost of cart: {totalCostOfCart}\n\n");
@@ -257,7 +261,7 @@ namespace Webshoppen2.Models
                 }
 
             }
-            return (double)totalCostOfCart; 
+            return (double)totalCostOfCart;
         }
 
         public static void Checkout(double totalCostOfCart)
@@ -271,29 +275,25 @@ namespace Webshoppen2.Models
             {
 
 
-                //var checkout = (from c in db.Carts
-                //                join p in db.Products on c.ProductId equals p.Id
-                //                join cu in db.Customers on c.CustomerId equals cu.Id
-                //                join ch in db.
-                //                where cu.Id == loggedInId
-                //                select new { Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId }).ToList();
-                
-                //Random rnd = new Random();
-                //var randomOrderId = rnd.Next(0, 1000000).ToString() + loggedInId.ToString();
+                var checkout = (from c in db.Carts
+                                join p in db.Products on c.ProductId equals p.Id
+                                join cu in db.Customers on c.CustomerId equals cu.Id
+                                where cu.Id == loggedInId
+                                select new { Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId, OrderId = c.OrderId }).ToList();
 
-                //foreach (var c in checkout)
-                //{
-                //    var newCheckoutCart = new CheckoutCart
-                //    {
-                //        OrderId = float.Parse(randomOrderId),
-                //        ProductId = c.CartProductId,
-                //        AmountofUnits = c.AmountofUnits,
-                //        CustomerId = c.CartCustomerId,
-                //    };
-                //    var newCheckoutCartList = db.;
-                //    newCheckoutCartList.Add();
-                //    db.SaveChanges();
-                //}
+                Random rnd = new Random();
+                var randomOrderId = rnd.Next(0, 1000000).ToString() + loggedInId.ToString();
+                float.Parse(randomOrderId);
+
+                foreach (var c in checkout)
+                {
+                    if (c.CartCustomerId == loggedInId && c.OrderId == null)
+                    {
+                        //c.CartCustomerId = 1,
+                        //c.OrderId = randomOrderId;                       
+                    }
+                }
+                db.SaveChanges();
 
 
                 //var parcelChoise = (from s in db.ShippingInfos

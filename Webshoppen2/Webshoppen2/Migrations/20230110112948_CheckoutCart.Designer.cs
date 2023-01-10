@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Webshoppen2.Models;
 
@@ -11,9 +12,10 @@ using Webshoppen2.Models;
 namespace Webshoppen2.Migrations
 {
     [DbContext(typeof(webshoppenContext))]
-    partial class webshoppenContextModelSnapshot : ModelSnapshot
+    [Migration("20230110112948_CheckoutCart")]
+    partial class CheckoutCart
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,9 +37,6 @@ namespace Webshoppen2.Migrations
 
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
-
-                    b.Property<float?>("OrderId")
-                        .HasColumnType("real");
 
                     b.Property<int?>("ProductId")
                         .HasColumnType("int");
