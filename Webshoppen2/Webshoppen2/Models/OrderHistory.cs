@@ -11,5 +11,6 @@ namespace Webshoppen2.Models
         public string? ShippingAddress { get; set; }
         public string? ShippingCity { get; set; }
         public int? PaymentInfoId { get; set; }
+        public int? CustomerId { get; set; }
     }
 }

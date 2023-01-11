@@ -417,6 +417,7 @@ namespace Webshoppen2.Models
                         foreach (var d in db.OrderHistories.Where(x => x.CheckoutCartOrderId == null))
                         {
                             d.CheckoutCartOrderId = s.OrderId;
+                            d.CustomerId = loggedInId;
                         }
                     }
                 }

@@ -61,26 +61,14 @@ namespace Webshoppen2.AllMethods
                 Console.WriteLine("Input Security number that you want to check: ");
                 long securityNumber = Methods.TryNumberLong();
                 var purchaseHistory = (from c in db.Customers
-                                       join ca in db.Carts on c.Id equals ca.CustomerId
-                                       join o in db.OrderHistories on ca.OrderId equals o.CheckoutCartOrderId
-                                       join p in db.Products on ca.ProductId equals p.Id
+                                       join o in db.OrderHistories on c.Id equals o.CustomerId
                                        where c.SocialSecurityNumber == securityNumber
-                                       select new { SocialSecurityNumber = c.SocialSecurityNumber, OrderNumber = o.CheckoutCartOrderId, CustomerId = c.Id });
+                                       select new { SocialSecurityNumber = c.SocialSecurityNumber, OrderNumber = o.CheckoutCartOrderId, CustomerId = o.CustomerId }).ToList();
 
                 foreach (var purchase in purchaseHistory)
                 {
-                    foreach (var customer in db.Customers.Where(x => x.SocialSecurityNumber == securityNumber))
-                    {
-                        var customerId = 5;
-                        if (customerId == purchase.CustomerId)
-                        {
-                            Console.WriteLine($"{purchase.OrderNumber}");
-                        }
-                    }
-
+                    Console.WriteLine($"{purchase.OrderNumber}");
                 }
-
-
             }
         }
 
