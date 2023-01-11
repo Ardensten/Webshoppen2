@@ -321,13 +321,19 @@ namespace Webshoppen2.Models
             {
                 using (var db = new webshoppenContext())
                 {
-                    foreach (var c in db.Customers.Where(c => c.Id == loggedInId))
+                    var customerInfos = (from c in db.Customers
+                                         join ci in db.Cities on c.CityId equals ci.Id
+                                         where c.Id == loggedInId
+                                         select new { StreetName = c.Adress, City = ci.Name, Name = c.Name });
+                    foreach (var c in customerInfos)
                     {
-                        Console.Write($"{c.Name}\n{c.Adress}");
-                        var shippingAddress = db.OrderHistories.Where(x => x.ShippingInfoId == 1);
-                        foreach (var s in shippingAddress)
+                        Console.Write($"{c.Name}\n{c.StreetName}\n{c.City}");
+                        var orders = db.OrderHistories.Where(x => x.CheckoutCartOrderId == null);
+                        foreach (var o in orders)
                         {
-                            s.ShippingAddress = c.Adress;
+
+                            o.ShippingAddress = c.StreetName;
+                            o.ShippingCity = c.City;
                         }
                     }
                     db.SaveChanges();
@@ -408,7 +414,7 @@ namespace Webshoppen2.Models
                     if (s.CustomerId == loggedInId && s.OrderId == null)
                     {
                         s.OrderId = float.Parse(randomOrderId);
-                        foreach (var d in db.OrderHistories)
+                        foreach (var d in db.OrderHistories.Where(x => x.CheckoutCartOrderId == null))
                         {
                             d.CheckoutCartOrderId = s.OrderId;
                         }
@@ -416,13 +422,34 @@ namespace Webshoppen2.Models
                 }
                 db.SaveChanges();
                 ConfirmOrder(randomOrderId);
+
+
+                var product = (from p in db.Products
+                               join c in db.Carts on p.Id equals c.ProductId
+                               where c.OrderId == float.Parse(randomOrderId)
+                               select new { Stock = p.UnitsInStock, CartAmount = c.AmountofUnits, ProductId = p.Id, CartProductId = c.ProductId });
+                foreach (var p in db.Products)
+                {
+                    foreach (var pr in product)
+                    {
+                        if (p.Id == pr.CartProductId)
+                        {
+                            p.UnitsInStock -= pr.CartAmount;
+
+                        }
+                    }
+                }
+                db.SaveChanges();
+
+
+
             }
         }
         internal static void ConfirmOrder(string orderId)
         {
             Console.WriteLine($"Your order has been placed, thank you for your purchase!" +
                 $"\nYour order id is: {orderId}\n" +
-                $" __        __   _                             _                _    \r\n \\ \\      / /__| | ___ ___  _ __ ___   ___   | |__   __ _  ___| | __\r\n  \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\  | '_ \\ / _` |/ __| |/ /\r\n   \\ V  V /  __/ | (_| (_) | | | | | |  __/  | |_) | (_| | (__|   < \r\n    \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|  |_.__/ \\__,_|\\___|_|\\_\\\r\n\r\n\r\n                     \t  .sssssssss.\r\n                    .sssssssssssssssssss\r\n                  sssssssssssssssssssssssss\r\n                ssssssssssssssssssssssssssss\r\n                 @@sssssssssssssssssssssss@ss\r\n                 |s@@@@sssssssssssssss@@@@s|s\r\n          _______|sssss@@@@@sssss@@@@@sssss|s\r\n        /         sssssssss@sssss@sssssssss|s\r\n       /  .------+.ssssssss@sssss@ssssssss.|\r\n      /  /       |...sssssss@sss@sssssss...|\r\n     |  |        |.......sss@sss@ssss......|\r\n     |  |        |..........s@ss@sss.......|\r\n     |  |        |...........@ss@..........|\r\n      \\  \\       |............ss@..........|\r\n       \\  '------+...........ss@...........|\r\n        \\________ .........................|\r\n                 |.........................|\r\n                /...........................\\\r\n               |.............................|\r\n                  |.......................|\r\n                      |...............|");           
+                $" __        __   _                             _                _    \r\n \\ \\      / /__| | ___ ___  _ __ ___   ___   | |__   __ _  ___| | __\r\n  \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\  | '_ \\ / _` |/ __| |/ /\r\n   \\ V  V /  __/ | (_| (_) | | | | | |  __/  | |_) | (_| | (__|   < \r\n    \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|  |_.__/ \\__,_|\\___|_|\\_\\\r\n\r\n\r\n                     \t  .sssssssss.\r\n                    .sssssssssssssssssss\r\n                  sssssssssssssssssssssssss\r\n                ssssssssssssssssssssssssssss\r\n                 @@sssssssssssssssssssssss@ss\r\n                 |s@@@@sssssssssssssss@@@@s|s\r\n          _______|sssss@@@@@sssss@@@@@sssss|s\r\n        /         sssssssss@sssss@sssssssss|s\r\n       /  .------+.ssssssss@sssss@ssssssss.|\r\n      /  /       |...sssssss@sss@sssssss...|\r\n     |  |        |.......sss@sss@ssss......|\r\n     |  |        |..........s@ss@sss.......|\r\n     |  |        |...........@ss@..........|\r\n      \\  \\       |............ss@..........|\r\n       \\  '------+...........ss@...........|\r\n        \\________ .........................|\r\n                 |.........................|\r\n                /...........................\\\r\n               |.............................|\r\n                  |.......................|\r\n                      |...............|");
             // ev back to shopping alternativ
         }
         internal static void Categories()
