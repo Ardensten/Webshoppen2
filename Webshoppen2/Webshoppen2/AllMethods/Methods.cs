@@ -435,7 +435,6 @@ namespace Webshoppen2.Models
                         if (p.Id == pr.CartProductId)
                         {
                             p.UnitsInStock -= pr.CartAmount;
-
                         }
                     }
                 }

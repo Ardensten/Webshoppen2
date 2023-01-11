@@ -56,7 +56,32 @@ namespace Webshoppen2.AllMethods
 
         private static void ViewPurchaseHistory()
         {
+            using (var db = new webshoppenContext())
+            {
+                Console.WriteLine("Input Security number that you want to check: ");
+                long securityNumber = Methods.TryNumberLong();
+                var purchaseHistory = (from c in db.Customers
+                                       join ca in db.Carts on c.Id equals ca.CustomerId
+                                       join o in db.OrderHistories on ca.OrderId equals o.CheckoutCartOrderId
+                                       join p in db.Products on ca.ProductId equals p.Id
+                                       where c.SocialSecurityNumber == securityNumber
+                                       select new { SocialSecurityNumber = c.SocialSecurityNumber, OrderNumber = o.CheckoutCartOrderId, CustomerId = c.Id });
 
+                foreach (var purchase in purchaseHistory)
+                {
+                    foreach (var customer in db.Customers.Where(x => x.SocialSecurityNumber == securityNumber))
+                    {
+                        var customerId = 5;
+                        if (customerId == purchase.CustomerId)
+                        {
+                            Console.WriteLine($"{purchase.OrderNumber}");
+                        }
+                    }
+
+                }
+
+
+            }
         }
 
         private static void ChangeCustomerInfo()
@@ -88,7 +113,7 @@ namespace Webshoppen2.AllMethods
 
         private static void AddProduct()
         {
-            
+
             Console.WriteLine("\nEnter product name: ");
             string name = Console.ReadLine();
             Console.WriteLine("\nEnter product price: ");
@@ -131,7 +156,7 @@ namespace Webshoppen2.AllMethods
                 var suppliers = db.Suppliers;
                 int i = 20;
                 Console.SetCursorPosition(80, i);
-                Console.ForegroundColor= ConsoleColor.Green;
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Suppliers list.");
                 Console.ResetColor();
                 foreach (var s in suppliers)
@@ -140,7 +165,7 @@ namespace Webshoppen2.AllMethods
                     Console.SetCursorPosition(80, i);
                     Console.WriteLine($"{s.Id} {s.Name} ");
                 }
-                
+
             }
         }
 
