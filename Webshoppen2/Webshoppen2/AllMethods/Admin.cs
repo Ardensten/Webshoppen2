@@ -161,7 +161,6 @@ namespace Webshoppen2.AllMethods
             }
         }
 
-
         public static void EditProduct()
         {
             Console.WriteLine("Input id of product you want to edit");

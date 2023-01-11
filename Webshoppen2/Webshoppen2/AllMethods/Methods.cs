@@ -421,7 +421,7 @@ namespace Webshoppen2.Models
         internal static void ConfirmOrder(string orderId)
         {
             Console.WriteLine($"Your order has been placed, thank you for your purchase!" +
-                $"\nYour order id is: {orderId}" +
+                $"\nYour order id is: {orderId}\n" +
                 $" __        __   _                             _                _    \r\n \\ \\      / /__| | ___ ___  _ __ ___   ___   | |__   __ _  ___| | __\r\n  \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\  | '_ \\ / _` |/ __| |/ /\r\n   \\ V  V /  __/ | (_| (_) | | | | | |  __/  | |_) | (_| | (__|   < \r\n    \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|  |_.__/ \\__,_|\\___|_|\\_\\\r\n\r\n\r\n                     \t  .sssssssss.\r\n                    .sssssssssssssssssss\r\n                  sssssssssssssssssssssssss\r\n                ssssssssssssssssssssssssssss\r\n                 @@sssssssssssssssssssssss@ss\r\n                 |s@@@@sssssssssssssss@@@@s|s\r\n          _______|sssss@@@@@sssss@@@@@sssss|s\r\n        /         sssssssss@sssss@sssssssss|s\r\n       /  .------+.ssssssss@sssss@ssssssss.|\r\n      /  /       |...sssssss@sss@sssssss...|\r\n     |  |        |.......sss@sss@ssss......|\r\n     |  |        |..........s@ss@sss.......|\r\n     |  |        |...........@ss@..........|\r\n      \\  \\       |............ss@..........|\r\n       \\  '------+...........ss@...........|\r\n        \\________ .........................|\r\n                 |.........................|\r\n                /...........................\\\r\n               |.............................|\r\n                  |.......................|\r\n                      |...............|");           
             // ev back to shopping alternativ
         }
