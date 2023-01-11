@@ -51,12 +51,12 @@ namespace Webshoppen2.Models
 
             modelBuilder.Entity<City>(entity =>
             {
-                entity.HasKey(e => e.Ld)
+                entity.HasKey(e => e.Id)
                     .HasName("PK__City__3213A159F4FB77C6");
 
                 entity.ToTable("City");
 
-                entity.Property(e => e.Ld).HasColumnName("ld");
+                entity.Property(e => e.Id).HasColumnName("ld");
 
                 entity.Property(e => e.Name).HasMaxLength(30);
             });

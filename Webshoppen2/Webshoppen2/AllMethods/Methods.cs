@@ -279,20 +279,6 @@ namespace Webshoppen2.Models
                                 where cu.Id == loggedInId
                                 select new { Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId, OrderId = c.OrderId }).ToList();
 
-                Random rnd = new Random();
-                var randomOrderId = rnd.Next(100000, 999999).ToString() + loggedInId.ToString();
-
-                var setOrderId = db.Carts.Where(p => p.CustomerId == loggedInId);
-
-                foreach (var s in setOrderId)
-                {
-                    if (s.CustomerId == loggedInId && s.OrderId == null)
-                    {
-                        s.OrderId = float.Parse(randomOrderId);
-                    }
-                }
-                db.SaveChanges();
-
                 //var checkoutCart = db.Carts.Where(p => p.CustomerId == loggedInId);
 
                 Console.WriteLine();
@@ -305,8 +291,6 @@ namespace Webshoppen2.Models
                     var newParcel = new OrderHistory
                     {
                         ShippingInfoId = 1,
-
-
                     };
                     var orderHistoryList = db.OrderHistories;
                     orderHistoryList.Add(newParcel);
@@ -358,13 +342,14 @@ namespace Webshoppen2.Models
 
                 using (var db = new webshoppenContext())
                 {
-                    var shippingAddress = db.OrderHistories.Where(x => x.CheckoutCartOrderId != null).SingleOrDefault();
-                    if (shippingAddress != null)
+                    var shippingAddress = db.OrderHistories.Where(x => x.ShippingInfoId == 1);
+                    foreach (var s in shippingAddress)
                     {
-                        shippingAddress.ShippingCity = newCity;
-                        shippingAddress.ShippingAddress = newStreetName;
-                        db.SaveChanges();
+                        s.ShippingCity = newCity;
+                        s.ShippingAddress = newStreetName;
                     }
+                    db.SaveChanges();
+
                 }
             }
             PayCheckout(totalCostOfCart);
@@ -388,7 +373,57 @@ namespace Webshoppen2.Models
                     }
                 }
                 Console.WriteLine($"Total cost including shipping-cost and VAT: {totalCostOfCart}\nVAT: {totalCostOfCart * 0.25}");
+                Console.WriteLine($"Choose payment-method: \n[D]ebit card\n[I]nvoice");
+                var payChoice = Console.ReadLine();
+                var orderHistory = (from o in db.OrderHistories
+                                    where o.CheckoutCartOrderId == null
+                                    select o);
+                if (payChoice == "d")
+                {
+                    Console.WriteLine("Enter card number:");
+                    var cardNumber = Console.ReadLine();
+                    foreach (var o in orderHistory)
+                    {
+                        o.PaymentInfoId = 2;
+                    }
+                    db.SaveChanges();
+                }
+                else if (payChoice == "i")
+                {
+                    Console.WriteLine("The users personal number has been used to file an invoice");
+                    foreach (var o in orderHistory)
+                    {
+                        o.PaymentInfoId = 1;
+                    }
+                    db.SaveChanges();
+                }
+
+                Random rnd = new Random();
+                var randomOrderId = rnd.Next(100000, 999999).ToString() + loggedInId.ToString();
+
+                var setOrderId = db.Carts.Where(p => p.CustomerId == loggedInId);
+
+                foreach (var s in setOrderId)
+                {
+                    if (s.CustomerId == loggedInId && s.OrderId == null)
+                    {
+                        s.OrderId = float.Parse(randomOrderId);
+                        foreach (var d in db.OrderHistories)
+                        {
+                            d.CheckoutCartOrderId = s.OrderId;
+                        }
+                    }
+                }
+                db.SaveChanges();
+                ConfirmOrder(randomOrderId);
             }
+        }
+        internal static void ConfirmOrder(string orderId)
+        {
+            Console.WriteLine($"Your order has been placed, thank you for your purchase!" +
+                $"\nYour order id is: {orderId}" +
+                $" __        __   _                             _                _    \r\n \\ \\      / /__| | ___ ___  _ __ ___   ___   | |__   __ _  ___| | __\r\n  \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\  | '_ \\ / _` |/ __| |/ /\r\n   \\ V  V /  __/ | (_| (_) | | | | | |  __/  | |_) | (_| | (__|   < \r\n    \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|  |_.__/ \\__,_|\\___|_|\\_\\\r\n\r\n\r\n                     \t  .sssssssss.\r\n                    .sssssssssssssssssss\r\n                  sssssssssssssssssssssssss\r\n                ssssssssssssssssssssssssssss\r\n                 @@sssssssssssssssssssssss@ss\r\n                 |s@@@@sssssssssssssss@@@@s|s\r\n          _______|sssss@@@@@sssss@@@@@sssss|s\r\n        /         sssssssss@sssss@sssssssss|s\r\n       /  .------+.ssssssss@sssss@ssssssss.|\r\n      /  /       |...sssssss@sss@sssssss...|\r\n     |  |        |.......sss@sss@ssss......|\r\n     |  |        |..........s@ss@sss.......|\r\n     |  |        |...........@ss@..........|\r\n      \\  \\       |............ss@..........|\r\n       \\  '------+...........ss@...........|\r\n        \\________ .........................|\r\n                 |.........................|\r\n                /...........................\\\r\n               |.............................|\r\n                  |.......................|\r\n                      |...............|");           
+            // ev back to shopping alternativ
         }
         internal static void Categories()
         {

@@ -11,7 +11,7 @@ namespace Webshoppen2.Models
             Suppliers = new HashSet<Supplier>();
         }
 
-        public int Ld { get; set; }
+        public int Id { get; set; }
         public string? Name { get; set; }
         public int? CountryId { get; set; }
 

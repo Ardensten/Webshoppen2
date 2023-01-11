@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Webshoppen2.Models;
 
@@ -11,9 +12,10 @@ using Webshoppen2.Models;
 namespace Webshoppen2.Migrations
 {
     [DbContext(typeof(webshoppenContext))]
-    partial class webshoppenContextModelSnapshot : ModelSnapshot
+    [Migration("20230111093904_CheckoutCartOrderId")]
+    partial class CheckoutCartOrderId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,12 +68,12 @@ namespace Webshoppen2.Migrations
 
             modelBuilder.Entity("Webshoppen2.Models.City", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("Ld")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("ld");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ld"), 1L, 1);
 
                     b.Property<int?>("CountryId")
                         .HasColumnType("int");
@@ -80,7 +82,7 @@ namespace Webshoppen2.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.HasKey("Id")
+                    b.HasKey("Ld")
                         .HasName("PK__City__3213A159F4FB77C6");
 
                     b.ToTable("City", (string)null);
@@ -154,8 +156,8 @@ namespace Webshoppen2.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<float?>("CheckoutCartOrderId")
-                        .HasColumnType("real");
+                    b.Property<int?>("CheckoutCartOrderId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("PaymentInfoId")
                         .HasColumnType("int");
