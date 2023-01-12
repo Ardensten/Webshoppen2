@@ -12,46 +12,55 @@ namespace Webshoppen2.AllMethods
     {
         internal static void Menu()
         {
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("\t\t\t\t     _    ____  __  __ ___ _   _ \r\n\t\t\t\t    / \\  |  _ \\|  \\/  |_ _| \\ | |\r\n\t\t\t\t   / _ \\ | | | | |\\/| || ||  \\| |\r\n\t\t\t\t  / ___ \\| |_| | |  | || || |\\  |\r\n\t\t\t\t /_/   \\_\\____/|_|  |_|___|_| \\_|\r\n\n");
-            Console.ResetColor();
-            Console.WriteLine($"[1] Add a product."
-                + "\n[2] Change a product."
-                + "\n[3] Delete a product."
-                + "\n[4] Add category."
-                + "\n[5] Change customer-info"
-                + "\n[6] View purchase histories");
-
-            ConsoleKeyInfo key = Console.ReadKey(true);
-
-            switch (key.KeyChar)
+            bool runMenu = false;
+            while (!runMenu)
             {
-                case '1':
-                    AddProduct();
-                    break;
-                case '2':
-                    EditProduct();
-                    break;
-                case '3':
-                    RemoveProduct();
-                    break;
-                case '4':
-                    AddCategory();
-                    break;
-                case '5':
-                    ChangeCustomerInfo();
-                    break;
-                case '6':
-                    ViewPurchaseHistory();
-                    break;
-                default:
-                    Methods.InputInstructions();
-                    break;
-            }
 
-            Console.ReadKey();
-            Console.Clear();
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\t\t\t\t     _    ____  __  __ ___ _   _ \r\n\t\t\t\t    / \\  |  _ \\|  \\/  |_ _| \\ | |\r\n\t\t\t\t   / _ \\ | | | | |\\/| || ||  \\| |\r\n\t\t\t\t  / ___ \\| |_| | |  | || || |\\  |\r\n\t\t\t\t /_/   \\_\\____/|_|  |_|___|_| \\_|\r\n\n");
+                Console.ResetColor();
+                Console.WriteLine($"[1] Add a product."
+                    + "\n[2] Change a product."
+                    + "\n[3] Delete a product."
+                    + "\n[4] Add category."
+                    + "\n[5] Change customer-info."
+                    + "\n[6] View purchase histories."
+                    + "\n[7] Log out.");
+
+                ConsoleKeyInfo key = Console.ReadKey(true);
+
+                switch (key.KeyChar)
+                {
+                    case '1':
+                        AddProduct();
+                        break;
+                    case '2':
+                        EditProduct();
+                        break;
+                    case '3':
+                        RemoveProduct();
+                        break;
+                    case '4':
+                        AddCategory();
+                        break;
+                    case '5':
+                        ChangeCustomerInfo();
+                        break;
+                    case '6':
+                        ViewPurchaseHistory();
+                        break;
+                    case '7':
+                        runMenu = true;
+                        break;
+                    default:
+                        Methods.InputInstructions();
+                        break;
+                }
+
+                Console.ReadKey();
+                Console.Clear();
+            }
         }
 
         private static void ViewPurchaseHistory()
@@ -112,9 +121,10 @@ namespace Webshoppen2.AllMethods
             int supplierId = 0; supplierId = Methods.TryNumberInt();
 
             Console.WriteLine("\nEnter product category-id: ");
-            int categoryId = 0; categoryId = Methods.TryNumberInt();
-            //ShowListCategory();
+            ShowListCategory();
+            Console.SetCursorPosition(0, 24);
 
+            int categoryId = 0; categoryId = Methods.TryNumberInt();
             Console.WriteLine("\nEnter product information text: ");
             var infotext = Console.ReadLine();
             Console.WriteLine("\nEnter number of products in stock: ");
@@ -137,21 +147,61 @@ namespace Webshoppen2.AllMethods
             }
         }
 
+        private static void ShowListproducts(int categoryId)
+        {
+            using (var db = new webshoppenContext())
+            {
+                var products = db.Products;
+                int i = 10;
+                Console.SetCursorPosition(70, i);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Product list.");
+                Console.ResetColor();
+                foreach (var p in products.Where(p => p.CategoryId == categoryId))
+                {
+                    i++;
+                    Console.SetCursorPosition(70, i);
+                    Console.WriteLine($"{p.Id} {p.Name} ");
+                }
+
+            }
+        }
+
         private static void ShowListSupplier()
         {
             using (var db = new webshoppenContext())
             {
                 var suppliers = db.Suppliers;
-                int i = 20;
-                Console.SetCursorPosition(80, i);
+                int i = 10;
+                Console.SetCursorPosition(70, i);
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Suppliers list.");
                 Console.ResetColor();
                 foreach (var s in suppliers)
                 {
                     i++;
-                    Console.SetCursorPosition(80, i);
+                    Console.SetCursorPosition(70, i);
                     Console.WriteLine($"{s.Id} {s.Name} ");
+                }
+
+            }
+        }
+
+        private static void ShowListCategory()
+        {
+            using (var db = new webshoppenContext())
+            {
+                var categories = db.Categories;
+                int i = 10;
+                Console.SetCursorPosition(100, i);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Categories list.");
+                Console.ResetColor();
+                foreach (var c in categories)
+                {
+                    i++;
+                    Console.SetCursorPosition(100, i);
+                    Console.WriteLine($"{c.Id} {c.Name} ");
                 }
 
             }
@@ -176,8 +226,14 @@ namespace Webshoppen2.AllMethods
 
         public static void EditProduct()
         {
+            Console.WriteLine("\nInput id of the category you want to edit");
+            ShowListCategory();
+            Console.SetCursorPosition(0, 16);
+            var categoryId = Methods.TryNumberInt();
             Console.WriteLine("Input id of product you want to edit");
-            var productId = 0; productId = Methods.TryNumberInt();
+            ShowListproducts(categoryId);
+            Console.SetCursorPosition(0, 18);
+            var productId = Methods.TryNumberInt();
 
             Console.WriteLine("What do you want to edit?\n" +
                 "[1] : Name\n" +
@@ -188,86 +244,90 @@ namespace Webshoppen2.AllMethods
                 "[6] : Remove product from front page\n" +
                 "[7] : Return to main menu");
 
-            ConsoleKeyInfo key = Console.ReadKey(true);
-            using (var db = new webshoppenContext())
+            bool runMenu = false;
+            while (!runMenu)
             {
-                switch (key.KeyChar)
+                ConsoleKeyInfo key = Console.ReadKey(true);
+                using (var db = new webshoppenContext())
                 {
-                    case '1':
-                        Console.WriteLine("What is the new name");
-                        var newName = Console.ReadLine();
-                        var product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
+                    switch (key.KeyChar)
+                    {
+                        case '1':
+                            Console.WriteLine("What is the new name");
+                            var newName = Console.ReadLine();
+                            var product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
 
-                        if (product != null)
-                        {
-                            product.Name = newName;
-                            db.SaveChanges();
-                        }
-                        break;
+                            if (product != null)
+                            {
+                                product.Name = newName;
+                                db.SaveChanges();
+                            }
+                            break;
 
-                    case '2':
-                        Console.WriteLine("Enter the updated price: ");
-                        var newPrice = 0; Methods.TryNumberDouble();
-                        product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
+                        case '2':
+                            Console.WriteLine("Enter the updated price: ");
+                            var newPrice = 0; Methods.TryNumberDouble();
+                            product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
 
-                        if (product != null)
-                        {
-                            product.Price = newPrice;
-                            db.SaveChanges();
-                        }
-                        break;
+                            if (product != null)
+                            {
+                                product.Price = newPrice;
+                                db.SaveChanges();
+                            }
+                            break;
 
-                    case '3':
-                        Console.WriteLine("Enter the updated info-text: ");
-                        var newText = Console.ReadLine();
-                        product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
+                        case '3':
+                            Console.WriteLine("Enter the updated info-text: ");
+                            var newText = Console.ReadLine();
+                            product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
 
-                        if (product != null)
-                        {
-                            product.InfoText = newText;
-                            db.SaveChanges();
-                        }
-                        break;
+                            if (product != null)
+                            {
+                                product.InfoText = newText;
+                                db.SaveChanges();
+                            }
+                            break;
 
-                    case '4':
-                        Console.WriteLine("Enter the updated amount of units in stock: ");
-                        var newUnitsInStock = 0; newUnitsInStock = Methods.TryNumberInt();
-                        product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
+                        case '4':
+                            Console.WriteLine("Enter the updated amount of units in stock: ");
+                            var newUnitsInStock = 0; newUnitsInStock = Methods.TryNumberInt();
+                            product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
 
-                        if (product != null)
-                        {
-                            product.UnitsInStock = newUnitsInStock;
-                            db.SaveChanges();
-                        }
-                        break;
+                            if (product != null)
+                            {
+                                product.UnitsInStock = newUnitsInStock;
+                                db.SaveChanges();
+                            }
+                            break;
 
-                    case '5':
-                        Console.WriteLine("Added product to front page. ");
-                        product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
+                        case '5':
+                            Console.WriteLine("Added product to front page. ");
+                            product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
 
-                        if (product != null)
-                        {
-                            product.ChosenProduct = true;
-                            db.SaveChanges();
-                        }
-                        break;
-                    case '6':
-                        Console.WriteLine("Removed product to front page. ");
-                        product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
+                            if (product != null)
+                            {
+                                product.ChosenProduct = true;
+                                db.SaveChanges();
+                            }
+                            break;
+                        case '6':
+                            Console.WriteLine("Removed product to front page. ");
+                            product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
 
-                        if (product != null)
-                        {
-                            product.ChosenProduct = false;
-                            db.SaveChanges();
-                        }
-                        break;
-                    case '7':
-                        Methods.Running();
-                        break;
+                            if (product != null)
+                            {
+                                product.ChosenProduct = false;
+                                db.SaveChanges();
+                            }
+                            break;
+                        case '7':
+                            runMenu = true;
+                            break;
 
-                    default:
-                        Methods.InputInstructions();
-                        break;
+                        default:
+                            Methods.InputInstructions();
+                            break;
+                    }
                 }
             }
         }

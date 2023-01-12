@@ -108,15 +108,22 @@ namespace Webshoppen2.Models
                 foreach (var i in id)
                 {
                     loggedInId = i.Id;
+                    StartPage(socialSecurityNumber);
+                }
+                if (loggedInId == 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("That user does not exist!");
+                    Console.ResetColor();
                 }
             }
-            StartPage(socialSecurityNumber);
         }
 
         public static void StartPage(long socialSecurityNumber)
         {
             Console.Clear();
-            while (true)
+            bool runMenu = false;
+            while (!runMenu)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("  ____            _                       _                  _    _ _                 _           _                  _   \r\n / ___| _   _ ___| |_ ___ _ __ ___  _   _| |___   _____  ___| | _| (_)_ __   __ _ ___| |__   ___ | | __ _  __ _  ___| |_ \r\n \\___ \\| | | / __| __/ _ \\ '_ ` _ \\| | | | __\\ \\ / / _ \\/ __| |/ / | | '_ \\ / _` / __| '_ \\ / _ \\| |/ _` |/ _` |/ _ \\ __|\r\n  ___) | |_| \\__ \\ ||  __/ | | | | | |_| | |_ \\ V /  __/ (__|   <| | | | | | (_| \\__ \\ |_) | (_) | | (_| | (_| |  __/ |_ \r\n |____/ \\__, |___/\\__\\___|_| |_| |_|\\__,_|\\__| \\_/ \\___|\\___|_|\\_\\_|_|_| |_|\\__, |___/_.__/ \\___/|_|\\__,_|\\__, |\\___|\\__|\r\n        |___/                                                               |___/                         |___/  ");
@@ -132,7 +139,7 @@ namespace Webshoppen2.Models
                     foreach (var p in db.Products.Where(p => p.ChosenProduct == true))
                     {
                         Console.Write("\t\t\t\t \t\t\t  _\r\n \t\t\t\t\t\t\t {_}\r\n \t\t\t\t\t\t\t |(|\r\n\t\t\t\t\t\t\t |=|\r\n\t\t\t\t\t\t\t/   \\\t\t\t\t\t  [-] \r\n\t\t.~~~~.\t\t\t\t\t|.--| \t\t\t\t\t.-'-'-. \r\n\t\ti====i_\t\t\t\t\t||  |\t\t\t\t\t:-...-: \r\n\t\t|cccc|_)\t\t\t\t||  |\t\t\t\t\t|;:   | \r\n\t\t|cccc|   \t\t\t\t|'--|\t\t\t\t\t|;:.._|\r\n\t\t`-==-'\t\t\t\t\t'-=-'\t\t\t\t\t`-...-'");
-                        Console.Write($"\n{p.Name}\tPrice: {p.Price}SEK \t\n");
+                        Console.Write($"\n\t{p.Name}\tPrice: {p.Price}SEK \t\n");
                         i++;
                         if (i >= 3)
                         {
@@ -140,7 +147,7 @@ namespace Webshoppen2.Models
                         }
                     }
 
-                    Console.WriteLine("\n\n\t\t1. Categories \t\t\t2. Search products \t\t\t3. Cart");
+                    Console.WriteLine("\n\n\t1. Categories \t\t2. Search products \t\t3. Cart \t\t4. Log out");
 
                 }
 
@@ -157,11 +164,13 @@ namespace Webshoppen2.Models
                     case '3':
                         ShowCart();
                         break;
+                    case '4':
+                        runMenu = true;
+                        break;
                     default:
                         InputInstructions();
                         break;
                 }
-                Console.ReadKey(true);
                 Console.Clear();
             }
         }
@@ -214,52 +223,56 @@ namespace Webshoppen2.Models
                 Console.WriteLine($"\n\nTotal cost of cart: {totalCostOfCart}\n\n");
                 Console.ResetColor();
 
-                Console.WriteLine("Where do you want to go?\n[E] : Edit your cart \n[C] : Checkout\n[B] : Back to categories");
-                var choice = Console.ReadLine();
-                if (choice == "e")
+                bool runMenu = false;
+                while (!runMenu)
                 {
-                    Console.WriteLine("-----------------------------");
-                    Console.WriteLine("[1] : Change amount of a product \n[2] : Remove a product from your cart");
-                    ConsoleKeyInfo key = Console.ReadKey(true);
-                    switch (key.KeyChar)
+                    Console.WriteLine("[E] : Edit your cart \n[C] : Checkout\n[B] : Back to start page");
+                    var choice = Console.ReadLine();
+                    if (choice == "e")
                     {
-                        case '1':
-                            Console.WriteLine("Which product do you want to change the amount of?");
-                            int cartProductId = TryNumberInt();
-                            Console.WriteLine("Enter the number you want in cart.");
-                            int productAmount = TryNumberInt();
+                        Console.WriteLine("-----------------------------");
+                        Console.WriteLine("[1] : Change amount of a product \n[2] : Remove a product from your cart");
+                        ConsoleKeyInfo key = Console.ReadKey(true);
+                        switch (key.KeyChar)
+                        {
+                            case '1':
+                                Console.WriteLine("Which product do you want to change the amount of?");
+                                int cartProductId = TryNumberInt();
+                                Console.WriteLine("Enter the number you want in cart.");
+                                int productAmount = TryNumberInt();
 
-                            var product = db.Carts.Where(p => p.Id == cartProductId);
-                            var changeCart = db.Carts.Where(p => p.CustomerId == loggedInId);
+                                var product = db.Carts.Where(p => p.Id == cartProductId);
+                                var changeCart = db.Carts.Where(p => p.CustomerId == loggedInId);
 
-                            foreach (var c in changeCart)
-                            {
-                                if (cartProductId == c.Id && loggedInId == c.CustomerId)
+                                foreach (var c in changeCart)
                                 {
-                                    c.AmountofUnits = productAmount;
+                                    if (cartProductId == c.Id && loggedInId == c.CustomerId)
+                                    {
+                                        c.AmountofUnits = productAmount;
+                                    }
+
                                 }
+                                db.SaveChanges();
 
-                            }
-                            db.SaveChanges();
+                                break;
+                        }
 
-                            break;
+                    }
+
+                    else if (choice == "c")
+                    {
+                        Checkout((double)totalCostOfCart);
+                    }
+                    else if (choice == "b")
+                    {
+                        runMenu = true;
+                    }
+                    else
+                    {
+                        InputInstructions();
                     }
 
                 }
-
-                else if (choice == "c")
-                {
-                    Checkout((double)totalCostOfCart);
-                }
-                else if (choice == "b")
-                {
-                    Categories();
-                }
-                else
-                {
-                    InputInstructions();
-                }
-
             }
             return (double)totalCostOfCart;
         }
@@ -505,8 +518,6 @@ namespace Webshoppen2.Models
                         InputInstructions();
                         break;
                 }
-
-                Console.ReadKey();
                 Console.Clear();
             }
         }
