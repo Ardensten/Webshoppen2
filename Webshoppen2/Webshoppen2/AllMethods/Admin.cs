@@ -24,9 +24,10 @@ namespace Webshoppen2.AllMethods
                     + "\n[2] Change a product."
                     + "\n[3] Delete a product."
                     + "\n[4] Add category."
-                    + "\n[5] Change customer-info."
-                    + "\n[6] View purchase histories."
-                    + "\n[7] Log out.");
+                    + "\n[5] Add Supplier."
+                    + "\n[6] Change customer-info."
+                    + "\n[7] View purchase histories."
+                    + "\n[8] Log out.");
 
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
@@ -45,12 +46,15 @@ namespace Webshoppen2.AllMethods
                         AddCategory();
                         break;
                     case '5':
-                        ChangeCustomerInfo();
+                        AddSupplier();
                         break;
                     case '6':
-                        ViewPurchaseHistory();
+                        ChangeCustomerInfo();
                         break;
                     case '7':
+                        ViewPurchaseHistory();
+                        break;
+                    case '8':
                         runMenu = true;
                         break;
                     default:
@@ -60,6 +64,48 @@ namespace Webshoppen2.AllMethods
 
                 Console.ReadKey();
                 Console.Clear();
+            }
+        }
+
+        private static void AddSupplier()
+        {
+            Console.WriteLine("Enter supplier name: ");
+            string name = Console.ReadLine();
+
+            ShowListCities();
+            Console.WriteLine("\nEnter city-id: ");
+            int cityId = Methods.TryNumberInt();
+
+            using (var db = new webshoppenContext())
+            {
+                var newSupplier = new Supplier
+                {
+                    Name = name,
+                    CityId = cityId
+                };
+                var supplierList = db.Suppliers;
+                supplierList.Add(newSupplier);
+                db.SaveChanges();
+            }
+        }
+
+        private static void ShowListCities()
+        {
+            using (var db = new webshoppenContext())
+            {
+                var cities = db.Cities;
+                int i = 10;
+                Console.SetCursorPosition(100, i);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("City list.");
+                Console.ResetColor();
+                foreach (var c in cities)
+                {
+                    i++;
+                    Console.SetCursorPosition(100, i);
+                    Console.WriteLine($"{c.Id} {c.Name} ");
+                }
+
             }
         }
 
@@ -83,12 +129,129 @@ namespace Webshoppen2.AllMethods
 
         private static void ChangeCustomerInfo()
         {
+            ShowListCustomers();
             using (var db = new webshoppenContext())
             {
-                foreach (var c in db.Customers)
+                Console.WriteLine("Input ID number of the customer you want to edit.");
+                var customerId = Methods.TryNumberInt();
+
+                Console.WriteLine("What do you want to edit?\n" +
+                              "[1] : Name\n" +
+                              "[2] : Social security number\n" +
+                              "[3] : Phone number\n" +
+                              "[4] : Email\n" +
+                              "[5] : City ID\n" +
+                              "[6] : Adress\n" +
+                              "[7] : Return to main menu");
+
+                bool runMenu = false;
+                while (!runMenu)
                 {
-                    Console.Write($"{c.Name}\t{c.SocialSecurityNumber}");
+                    ConsoleKeyInfo key = Console.ReadKey(true);
+
+                    switch (key.KeyChar)
+                    {
+                        case '1':
+                            Console.WriteLine("What is the new name");
+                            var newName = Console.ReadLine();
+                            var customer = db.Customers.Where(x => x.Id == customerId).SingleOrDefault();
+
+                            if (customer != null)
+                            {
+                                customer.Name = newName;
+                                db.SaveChanges();
+                            }
+                            break;
+
+                        case '2':
+                            Console.WriteLine("Enter the updated social security number: ");
+                            var newSocialSecurityNumber = Methods.TryNumberLong();
+                            customer = db.Customers.Where(x => x.Id == customerId).SingleOrDefault();
+
+                            if (customer != null)
+                            {
+                                customer.SocialSecurityNumber = newSocialSecurityNumber;
+                                db.SaveChanges();
+                            }
+                            break;
+
+                        case '3':
+                            Console.WriteLine("Enter the updated phone number: ");
+                            var newPhoneNumber = Methods.TryNumberInt();
+                            customer = db.Customers.Where(x => x.Id == customerId).SingleOrDefault();
+
+                            if (customer != null)
+                            {
+                                customer.PhoneNumber = newPhoneNumber;
+                                db.SaveChanges();
+                            }
+                            break;
+
+                        case '4':
+                            Console.WriteLine("Enter the updated email: ");
+                            var newEmail = Console.ReadLine();
+                            customer = db.Customers.Where(x => x.Id == customerId).SingleOrDefault();
+
+                            if (customer != null)
+                            {
+                                customer.Email = newEmail;
+                                db.SaveChanges();
+                            }
+                            break;
+
+                        case '5':
+                            Console.WriteLine("Enter the new city ID: ");
+                            ShowListCities();
+                            var newCityID = Methods.TryNumberInt();
+                            customer = db.Customers.Where(x => x.Id == customerId).SingleOrDefault();
+
+                            if (customer != null)
+                            {
+                                customer.CityId = newCityID;
+                                db.SaveChanges();
+                            }
+                            break;
+                        case '6':
+                            Console.WriteLine("Enter the new address: ");
+                            var newAddress = Console.ReadLine();
+                            customer = db.Customers.Where(x => x.Id == customerId).SingleOrDefault();
+
+                            if (customer != null)
+                            {
+                                customer.Adress = newAddress;
+                                db.SaveChanges();
+                            }
+                            break;
+                        case '7':
+                            runMenu = true;
+                            break;
+
+                        default:
+                            Methods.InputInstructions();
+                            break;
+                    }
                 }
+            }
+        }
+
+
+        private static void ShowListCustomers()
+        {
+            using (var db = new webshoppenContext())
+            {
+                var customers = db.Customers;
+                int i = 10;
+                Console.SetCursorPosition(100, i);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Customer list.");
+                Console.ResetColor();
+                foreach (var c in customers)
+                {
+                    i++;
+                    Console.SetCursorPosition(70, i);
+                    Console.WriteLine($"{c.Id} {c.Name} {c.SocialSecurityNumber}");
+                }
+
             }
         }
 
@@ -114,7 +277,7 @@ namespace Webshoppen2.AllMethods
             Console.WriteLine("\nEnter product name: ");
             string name = Console.ReadLine();
             Console.WriteLine("\nEnter product price: ");
-            double price = 0; price = Methods.TryNumberDouble();
+            double price = Methods.TryNumberDouble();
             Console.WriteLine("\nEnter product supplier-id: ");
             ShowListSupplier();
             Console.SetCursorPosition(0, 22);
@@ -146,6 +309,7 @@ namespace Webshoppen2.AllMethods
                 db.SaveChanges();
             }
         }
+
 
         private static void ShowListproducts(int categoryId)
         {
@@ -228,7 +392,7 @@ namespace Webshoppen2.AllMethods
         {
             Console.WriteLine("\nInput id of the category you want to edit");
             ShowListCategory();
-            Console.SetCursorPosition(0, 16);
+            Console.SetCursorPosition(0, 17);
             var categoryId = Methods.TryNumberInt();
             Console.WriteLine("Input id of product you want to edit");
             ShowListproducts(categoryId);
@@ -266,7 +430,7 @@ namespace Webshoppen2.AllMethods
 
                         case '2':
                             Console.WriteLine("Enter the updated price: ");
-                            var newPrice = 0; Methods.TryNumberDouble();
+                            var newPrice = Methods.TryNumberDouble();
                             product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
 
                             if (product != null)
@@ -290,7 +454,7 @@ namespace Webshoppen2.AllMethods
 
                         case '4':
                             Console.WriteLine("Enter the updated amount of units in stock: ");
-                            var newUnitsInStock = 0; newUnitsInStock = Methods.TryNumberInt();
+                            var newUnitsInStock = Methods.TryNumberInt();
                             product = db.Products.Where(x => x.Id == productId).SingleOrDefault();
 
                             if (product != null)
@@ -333,3 +497,5 @@ namespace Webshoppen2.AllMethods
         }
     }
 }
+
+
