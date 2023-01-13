@@ -676,6 +676,24 @@ namespace Webshoppen2.Models
             return number;
         }
 
+        internal static float TryNumberFloat()
+        {
+            float number = 0;
+            bool correctInput = false;
+            while (!correctInput)
+            {
+                if (!float.TryParse(Console.ReadLine(), out number))
+                {
+                    Console.WriteLine("Wrong input! Need a number.");
+                }
+                else
+                {
+                    correctInput = true;
+                }
+            }
+            return number;
+        }
+
         internal static int TryNumberInt()
         {
             int number = 0;

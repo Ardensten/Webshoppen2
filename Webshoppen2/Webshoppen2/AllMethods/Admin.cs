@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using Webshoppen2.Migrations;
 using Webshoppen2.Models;
 
 namespace Webshoppen2.AllMethods
@@ -124,6 +127,26 @@ namespace Webshoppen2.AllMethods
                 {
                     Console.WriteLine($"{purchase.OrderNumber}");
                 }
+
+                Console.WriteLine("Input orderId you want to see more of:");
+                var orderId = Methods.TryNumberFloat();
+                var carts = from c in db.Carts
+                            join p in db.Products on c.ProductId equals p.Id
+                            where c.OrderId == orderId
+                            select new { ProductName = p.Name, ProductPrice = p.Price, ProductAmount = c.AmountofUnits };
+
+                foreach (var cart in carts)
+                {
+                    //foreach (var product in cart)
+                    //{
+                    //    Console.WriteLine($"Product: {product.ProductName}\n" +
+                    //        $"Amount of products: {product.ProductAmount}\n" +
+                    //        $"Total Cost of {product.ProductName}: {product.ProductPrice * product.ProductAmount}");
+
+                    //}
+
+                }
+
             }
         }
 
@@ -135,18 +158,34 @@ namespace Webshoppen2.AllMethods
                 Console.WriteLine("Input ID number of the customer you want to edit.");
                 var customerId = Methods.TryNumberInt();
 
-                Console.WriteLine("What do you want to edit?\n" +
-                              "[1] : Name\n" +
-                              "[2] : Social security number\n" +
-                              "[3] : Phone number\n" +
-                              "[4] : Email\n" +
-                              "[5] : City ID\n" +
-                              "[6] : Adress\n" +
-                              "[7] : Return to main menu");
 
                 bool runMenu = false;
                 while (!runMenu)
                 {
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\t\t\t\t     _    ____  __  __ ___ _   _ \r\n\t\t\t\t    / \\  |  _ \\|  \\/  |_ _| \\ | |\r\n\t\t\t\t   / _ \\ | | | | |\\/| || ||  \\| |\r\n\t\t\t\t  / ___ \\| |_| | |  | || || |\\  |\r\n\t\t\t\t /_/   \\_\\____/|_|  |_|___|_| \\_|\r\n\n");
+                    Console.ResetColor();
+
+                    foreach (var customer in db.Customers.Where(x => x.Id == customerId))
+                    {
+                        Console.WriteLine($"Name: {customer.Name} \n" +
+                            $"Social Security number: {customer.SocialSecurityNumber} \n" +
+                            $"Phone number: {customer.PhoneNumber} \n" +
+                            $"Email: {customer.Email} \n" +
+                            $"City: {customer.City} \n" +
+                            $"Adress: {customer.Adress} \n");
+                    }
+
+                    Console.WriteLine("What do you want to edit?\n" +
+                                  "[1] : Name\n" +
+                                  "[2] : Social security number\n" +
+                                  "[3] : Phone number\n" +
+                                  "[4] : Email\n" +
+                                  "[5] : City ID\n" +
+                                  "[6] : Adress\n" +
+                                  "[7] : Return to main menu");
+
                     ConsoleKeyInfo key = Console.ReadKey(true);
 
                     switch (key.KeyChar)
@@ -399,21 +438,37 @@ namespace Webshoppen2.AllMethods
             Console.SetCursorPosition(0, 18);
             var productId = Methods.TryNumberInt();
 
-            Console.WriteLine("What do you want to edit?\n" +
-                "[1] : Name\n" +
-                "[2] : Price\n" +
-                "[3] : Infotext\n" +
-                "[4] : Units in Stock\n" +
-                "[5] : Add product to front page\n" +
-                "[6] : Remove product from front page\n" +
-                "[7] : Return to main menu");
 
             bool runMenu = false;
             while (!runMenu)
             {
-                ConsoleKeyInfo key = Console.ReadKey(true);
                 using (var db = new webshoppenContext())
                 {
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\t\t\t\t     _    ____  __  __ ___ _   _ \r\n\t\t\t\t    / \\  |  _ \\|  \\/  |_ _| \\ | |\r\n\t\t\t\t   / _ \\ | | | | |\\/| || ||  \\| |\r\n\t\t\t\t  / ___ \\| |_| | |  | || || |\\  |\r\n\t\t\t\t /_/   \\_\\____/|_|  |_|___|_| \\_|\r\n\n");
+                    Console.ResetColor();
+
+                    foreach (var product in db.Products.Where(x => x.Id == productId))
+                    {
+                        Console.WriteLine($"Name: {product.Name} \n" +
+                            $"Price: {product.Price} \n" +
+                            $"Infotext: {product.InfoText} \n" +
+                            $"Units in stock: {product.UnitsInStock} \n" +
+                            $"Chosen product status: {product.ChosenProduct} \n");
+
+                    }
+
+                    Console.WriteLine("What do you want to edit?\n" +
+                        "[1] : Name\n" +
+                        "[2] : Price\n" +
+                        "[3] : Infotext\n" +
+                        "[4] : Units in Stock\n" +
+                        "[5] : Add product to front page\n" +
+                        "[6] : Remove product from front page\n" +
+                        "[7] : Return to main menu");
+
+                    ConsoleKeyInfo key = Console.ReadKey(true);
                     switch (key.KeyChar)
                     {
                         case '1':
