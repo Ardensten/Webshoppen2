@@ -117,18 +117,18 @@ namespace Webshoppen2.AllMethods
             double price = 0; price = Methods.TryNumberDouble();
             Console.WriteLine("\nEnter product supplier-id: ");
             ShowListSupplier();
-            Console.SetCursorPosition(0, 21);
-            int supplierId = 0; supplierId = Methods.TryNumberInt();
+            Console.SetCursorPosition(0, 22);
+            int supplierId = Methods.TryNumberInt();
 
             Console.WriteLine("\nEnter product category-id: ");
             ShowListCategory();
             Console.SetCursorPosition(0, 24);
 
-            int categoryId = 0; categoryId = Methods.TryNumberInt();
+            int categoryId = Methods.TryNumberInt();
             Console.WriteLine("\nEnter product information text: ");
             var infotext = Console.ReadLine();
             Console.WriteLine("\nEnter number of products in stock: ");
-            int unitsInStock = 0; unitsInStock = Methods.TryNumberInt();
+            int unitsInStock = Methods.TryNumberInt();
 
             using (var db = new webshoppenContext())
             {
