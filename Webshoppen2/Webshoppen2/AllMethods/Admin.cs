@@ -23,50 +23,79 @@ namespace Webshoppen2.AllMethods
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("\t\t\t\t     _    ____  __  __ ___ _   _ \r\n\t\t\t\t    / \\  |  _ \\|  \\/  |_ _| \\ | |\r\n\t\t\t\t   / _ \\ | | | | |\\/| || ||  \\| |\r\n\t\t\t\t  / ___ \\| |_| | |  | || || |\\  |\r\n\t\t\t\t /_/   \\_\\____/|_|  |_|___|_| \\_|\r\n\n");
                 Console.ResetColor();
-                Console.WriteLine($"[1] Add a product."
-                    + "\n[2] Change a product."
-                    + "\n[3] Delete a product."
-                    + "\n[4] Add category."
-                    + "\n[5] Add Supplier."
-                    + "\n[6] Change customer-info."
-                    + "\n[7] View purchase histories."
-                    + "\n[8] Show statistics"
+                Console.WriteLine($"[1] Products."
+                    + "\n[2] Add category."
+                    + "\n[3] Add Supplier."
+                    + "\n[4] Change customer-info."
+                    + "\n[5] View purchase histories."
+                    + "\n[6] Show statistics"
                     + "\n[9] Log out.");
 
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
-                switch (key.KeyChar)
+                while (!runMenu)
                 {
-                    case '1':
-                        AddProduct();
-                        break;
-                    case '2':
-                        EditProduct();
-                        break;
-                    case '3':
-                        RemoveProduct();
-                        break;
-                    case '4':
-                        AddCategory();
-                        break;
-                    case '5':
-                        AddSupplier();
-                        break;
-                    case '6':
-                        ChangeCustomerInfo();
-                        break;
-                    case '7':
-                        ViewPurchaseHistory();
-                        break;
-                    case '8':
-                        ShowStatisticsMenu();
-                        break;
-                    case '9':
-                        runMenu = true;
-                        break;
-                    default:
-                        Methods.InputInstructions();
-                        break;
+                    switch (key.KeyChar)
+                    {
+                        case '1':
+                            Console.Clear();
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("\t\t\t\t     _    ____  __  __ ___ _   _ \r\n\t\t\t\t    / \\  |  _ \\|  \\/  |_ _| \\ | |\r\n\t\t\t\t   / _ \\ | | | | |\\/| || ||  \\| |\r\n\t\t\t\t  / ___ \\| |_| | |  | || || |\\  |\r\n\t\t\t\t /_/   \\_\\____/|_|  |_|___|_| \\_|\r\n\n");
+                            Console.ResetColor();
+                            Console.Write("[1] Add a product."
+                        + "\n[2] Change a product."
+                        + "\n[3] Delete a product."
+                        + "\n[4] Sold out products."
+                        + "\n[5] Go back.");
+
+                            ConsoleKeyInfo key2 = Console.ReadKey(true);
+
+                            switch (key2.KeyChar)
+                            {
+                                case '1':
+                                    AddProduct();
+                                    break;
+                                case '2':
+                                    EditProduct();
+                                    break;
+                                case '3':
+                                    RemoveProduct();
+                                    break;
+                                case '4':
+
+                                    break;
+                                case '5':
+                                    runMenu = true;
+                                    Admin.Menu();
+                                    break;
+                                default:
+                                    Methods.InputInstructions();
+                                    break;
+                            }
+                            Console.WriteLine();
+                            break;
+                        case '2':
+                            AddCategory();
+                            break;
+                        case '3':
+                            AddSupplier();
+                            break;
+                        case '4':
+                            ChangeCustomerInfo();
+                            break;
+                        case '5':
+                            ViewPurchaseHistory();
+                            break;
+                        case '6':
+                            ShowStatisticsMenu();
+                            break;
+                        case '9':
+                            runMenu = true;
+                            break;
+                        default:
+                            Methods.InputInstructions();
+                            break;
+                    }
                 }
             }
         }
@@ -85,14 +114,10 @@ namespace Webshoppen2.AllMethods
                     "\n[1] Top 3 best selling products" +
                     "\n[2] Most popular category" +
                     "\n[3] Most popular Parcelservice" +
-                    "\n[4] Sold out products" +
                     "\n[5] Go back to Admin Menu");
 
                 ConsoleKeyInfo key = Console.ReadKey(true);
                 ShowStatistics(key, running);
-
-
-
             }
         }
 
@@ -118,9 +143,9 @@ namespace Webshoppen2.AllMethods
 
                     case '2': //Most popular category
                         var popularCategories = (from c in db.Categories
-                                              join p in db.Products on c.Id equals p.CategoryId
-                                              join ca in db.Carts on p.Id equals ca.ProductId
-                                              select new { CategoryName = c.Name}).ToList().GroupBy(p => p.CategoryName);
+                                                 join p in db.Products on c.Id equals p.CategoryId
+                                                 join ca in db.Carts on p.Id equals ca.ProductId
+                                                 select new { CategoryName = c.Name }).ToList().GroupBy(p => p.CategoryName);
                         Console.WriteLine();
                         foreach (var category in popularCategories.OrderByDescending(p => p.Count()).Take(1))
                         {
@@ -130,8 +155,8 @@ namespace Webshoppen2.AllMethods
 
                     case '3'://Most popular Parcelservice
                         var popularPostservices = (from s in db.ShippingInfos
-                                                 join o in db.OrderHistories on s.Id equals o.ShippingInfoId
-                                                 select new { PostserviceName = s.ParcelServiceName }).ToList().GroupBy(p => p.PostserviceName);
+                                                   join o in db.OrderHistories on s.Id equals o.ShippingInfoId
+                                                   select new { PostserviceName = s.ParcelServiceName }).ToList().GroupBy(p => p.PostserviceName);
                         Console.WriteLine();
                         foreach (var postservice in popularPostservices.OrderByDescending(p => p.Count()).Take(1))
                         {
@@ -139,9 +164,6 @@ namespace Webshoppen2.AllMethods
                         }
                         break;
 
-                    case '4'://Sold out products
-
-                        break;
 
                     case '5':
                         running = false;
