@@ -135,18 +135,16 @@ namespace Webshoppen2.AllMethods
                             where c.OrderId == orderId
                             select new { ProductName = p.Name, ProductPrice = p.Price, ProductAmount = c.AmountofUnits };
 
+                double? totalCost = 0;
                 foreach (var cart in carts)
                 {
-                    //foreach (var product in cart)
-                    //{
-                    //    Console.WriteLine($"Product: {product.ProductName}\n" +
-                    //        $"Amount of products: {product.ProductAmount}\n" +
-                    //        $"Total Cost of {product.ProductName}: {product.ProductPrice * product.ProductAmount}");
-
-                    //}
-
+                    totalCost += cart.ProductPrice * cart.ProductAmount;
+                    Console.WriteLine($"Product: {cart.ProductName}\n" +
+                        $"Amount of products: {cart.ProductAmount}\n" +
+                        $"Total Cost of {cart.ProductName}: {cart.ProductPrice * cart.ProductAmount}");
                 }
-
+                totalCost = (double)System.Math.Round((double)totalCost, 2);
+                Console.WriteLine("Total cost of order: " + totalCost); 
             }
         }
 

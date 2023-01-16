@@ -181,22 +181,22 @@ namespace Webshoppen2.Models
             Console.WriteLine("\nType your search.");
             var search = Console.ReadLine();
             var sql = $"SELECT * FROM Product WHERE Name like '%{search}%'";
-            var beers = new List<Models.Product>();
+            var products = new List<Models.Product>();
 
             using (var db = new SqlConnection(connstring))
             {
-                beers = db.Query<Models.Product>(sql).ToList();
+                products = db.Query<Models.Product>(sql).ToList();
             }
 
-            Console.WriteLine();
-            foreach (var b in beers)
+            foreach (var product in products)
             {
-                Console.WriteLine($"{b.Price}Sek, \t\t{b.Name}");
+                Console.WriteLine($"\nId [{product.Id}]\t{product.Name}\t{product.Price}Sek");
             }
+            ShowInfoOnProduct();
             Console.ReadLine();
         }
 
-        private static double ShowCart() //Lägg till en loop för för processen
+        private static double ShowCart() 
         {
             double? totalCostOfCart = 0;
 
@@ -206,7 +206,7 @@ namespace Webshoppen2.Models
                             join p in db.Products on c.ProductId equals p.Id
                             join cu in db.Customers on c.CustomerId equals cu.Id
                             where cu.Id == loggedInId
-                            select new { Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId, OrderId = c.OrderId }).ToList();
+                            select new { Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits, CartProductId = c.ProductId, CartCustomerId = c.CustomerId, OrderId = c.OrderId }).ToList();
 
 
                 Console.WriteLine();
@@ -214,8 +214,9 @@ namespace Webshoppen2.Models
                 {
                     if (item.OrderId == null)
                     {
-                        Console.WriteLine($"{item.CartId} {item.Name} {item.Price} {item.AmountofUnits}");
+                        Console.WriteLine($"Id [{item.CartProductId}] {item.Name} {item.Price} {item.AmountofUnits}");
                         double? totalPerCartId = Convert.ToDouble(item.AmountofUnits) * item.Price;
+                        totalPerCartId = (double)System.Math.Round((double)totalPerCartId, 2);
                         totalCostOfCart += totalPerCartId;
                     }
                 }
@@ -231,32 +232,32 @@ namespace Webshoppen2.Models
                     if (choice == "e")
                     {
                         Console.WriteLine("-----------------------------");
-                        Console.WriteLine("[1] : Change amount of a product \n[2] : Remove a product from your cart");
-                        ConsoleKeyInfo key = Console.ReadKey(true);
-                        switch (key.KeyChar)
+                        Console.WriteLine("Which product do you want to change the amount of?");
+                        int cartProductId = TryNumberInt();
+                        Console.WriteLine("Enter the number you want in cart.");
+                        int productAmount = TryNumberInt();
+
+                        var products = db.Carts.Where(p => p.ProductId == cartProductId);
+                        var carts = db.Carts.Where(p => p.CustomerId == loggedInId);
+
+                        foreach (var c in carts)
                         {
-                            case '1':
-                                Console.WriteLine("Which product do you want to change the amount of?");
-                                int cartProductId = TryNumberInt();
-                                Console.WriteLine("Enter the number you want in cart.");
-                                int productAmount = TryNumberInt();
-
-                                var product = db.Carts.Where(p => p.Id == cartProductId);
-                                var changeCart = db.Carts.Where(p => p.CustomerId == loggedInId);
-
-                                foreach (var c in changeCart)
+                            if (cartProductId == c.ProductId && loggedInId == c.CustomerId && c.OrderId == null)
+                            {
+                                if (productAmount > 0)
                                 {
-                                    if (cartProductId == c.Id && loggedInId == c.CustomerId)
-                                    {
-                                        c.AmountofUnits = productAmount;
-                                    }
-
+                                    c.AmountofUnits = productAmount;
                                 }
-                                db.SaveChanges();
-
-                                break;
+                                else if (productAmount <= 0 && products != null)
+                                {
+                                    foreach (var p in products)
+                                    {
+                                        db.Carts.Remove(p);
+                                    }
+                                }
+                            }
                         }
-
+                        db.SaveChanges();
                     }
 
                     else if (choice == "c")
@@ -291,8 +292,6 @@ namespace Webshoppen2.Models
                                 join cu in db.Customers on c.CustomerId equals cu.Id
                                 where cu.Id == loggedInId
                                 select new { Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId, OrderId = c.OrderId }).ToList();
-
-                //var checkoutCart = db.Carts.Where(p => p.CustomerId == loggedInId);
 
                 Console.WriteLine();
                 Console.WriteLine("Choose shipping method: ");
@@ -391,7 +390,9 @@ namespace Webshoppen2.Models
                         Console.WriteLine($"{item.CartId} {item.Name} {item.Price} {item.AmountofUnits}");
                     }
                 }
-                Console.WriteLine($"Total cost including shipping-cost and VAT: {totalCostOfCart}\nVAT: {totalCostOfCart * 0.25}");
+                var vat = totalCostOfCart * 0.25;
+                vat = (double)System.Math.Round((double)vat, 2);
+                Console.WriteLine($"Total cost including shipping-cost and VAT: {totalCostOfCart}\nVAT: {vat}");
                 Console.WriteLine($"Choose payment-method: \n[D]ebit card\n[I]nvoice");
                 var payChoice = Console.ReadLine();
                 var orderHistory = (from o in db.OrderHistories
@@ -530,7 +531,7 @@ namespace Webshoppen2.Models
             {
                 foreach (var p in db.Products.Where(y => y.Id == choosenNumber).Include(x => x.Supplier).Include(c => c.Supplier.City))
                 {
-                    Console.WriteLine($"{p.Name} - {p.Price} - {p.InfoText} - {p.Supplier.Name} - {p.Supplier.City.Name}");
+                    Console.WriteLine($"{p.Name} - {p.Price} - {p.UnitsInStock} - {p.InfoText} - {p.Supplier.Name} - {p.Supplier.City.Name}");
                 }
             }
             CartChoice(choosenNumber);
