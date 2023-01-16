@@ -108,7 +108,7 @@ namespace Webshoppen2.Models
                 foreach (var i in id)
                 {
                     loggedInId = i.Id;
-                    StartPage(socialSecurityNumber);
+                    StartPage(loggedInId);
                 }
                 if (loggedInId == 0)
                 {
@@ -119,10 +119,13 @@ namespace Webshoppen2.Models
             }
         }
 
-        public static void StartPage(long socialSecurityNumber)
+        public static void StartPage(int id)
         {
             Console.Clear();
             bool runMenu = false;
+            int chosenProduct1 = 0;
+            int chosenProduct2 = 0;
+            int chosenProduct3 = 0;
             while (!runMenu)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -130,24 +133,43 @@ namespace Webshoppen2.Models
                 Console.ResetColor();
                 using (var db = new webshoppenContext())
                 {
-                    var customerName = db.Customers.Where(x => x.SocialSecurityNumber == socialSecurityNumber).Select(x => x.Name).FirstOrDefault();
+                    var customerName = db.Customers.Where(x => x.Id == loggedInId).Select(x => x.Name).FirstOrDefault();
                     Console.WriteLine($"\n\t\t  Welcome {customerName} to our beautiful webshop! Here can you buy spirits and get wasted!\n\n");
                     Console.WriteLine("\t\t\t\t\t\tRecommended products: ");
 
 
-                    int i = 0;
-                    foreach (var p in db.Products.Where(p => p.ChosenProduct == true))
-                    {
+                    var chosenProducts = (from p in db.Products
+                                          join c in db.Categories on p.CategoryId equals c.Id
+                                          select new { ProductName = p.Name, ProductPrice = p.Price, Productid = p.Id, ChosenProduct = p.ChosenProduct, CategoryId = c.Id, CategoryName = c.Name }).ToList();
+
+
                         Console.Write("\t\t\t\t \t\t\t  _\r\n \t\t\t\t\t\t\t {_}\r\n \t\t\t\t\t\t\t |(|\r\n\t\t\t\t\t\t\t |=|\r\n\t\t\t\t\t\t\t/   \\\t\t\t\t\t  [-] \r\n\t\t.~~~~.\t\t\t\t\t|.--| \t\t\t\t\t.-'-'-. \r\n\t\ti====i_\t\t\t\t\t||  |\t\t\t\t\t:-...-: \r\n\t\t|cccc|_)\t\t\t\t||  |\t\t\t\t\t|;:   | \r\n\t\t|cccc|   \t\t\t\t|'--|\t\t\t\t\t|;:.._|\r\n\t\t`-==-'\t\t\t\t\t'-=-'\t\t\t\t\t`-...-'");
-                        Console.Write($"\n\t{p.Name}\tPrice: {p.Price}SEK \t\n");
-                        i++;
-                        if (i >= 3)
+
+                    
+                    foreach (var p in chosenProducts.OrderBy(p => p.CategoryId))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        if (p.CategoryId == 1 && p.ChosenProduct == true)
                         {
-                            break;
+                            Console.Write($"\n\t{p.ProductName}, {p.ProductPrice}SEK \t");
+                            chosenProduct1 = p.Productid;
                         }
+                        else if (p.CategoryId == 2 && p.ChosenProduct == true)
+                        {
+                            Console.Write($"\t{p.ProductName}, {p.ProductPrice}SEK \t");
+                            chosenProduct2 = p.Productid;
+                        }
+                        else if (p.CategoryId == 3 && p.ChosenProduct == true)
+                        {
+                            Console.Write($"\t{p.ProductName}, {p.ProductPrice}SEK \t");
+                            chosenProduct3 = p.Productid;
+                        }
+                        Console.ResetColor();
                     }
 
-                    Console.WriteLine("\n\n\t1. Categories \t\t2. Search products \t\t3. Cart \t\t4. Log out");
+                    Console.WriteLine("\n\t\t\t\t\t  To quick add recommended Press []. \n\t\t[B]eer \t\t\t\t\t[W]ine \t\t\t\t\t [S]pirits");
+
+                    Console.WriteLine("\n\n\t\t1. Categories \t\t2. Search products \t\t3. Cart \t\t4. Log out");
 
                 }
 
@@ -166,6 +188,18 @@ namespace Webshoppen2.Models
                         break;
                     case '4':
                         runMenu = true;
+                        break;
+                    case 'B':
+                    case 'b':
+                        AddProductToCart(chosenProduct1);
+                        break;
+                    case 'W':
+                    case 'w':
+                        AddProductToCart(chosenProduct2);
+                        break;
+                    case 'S':
+                    case 's':
+                        AddProductToCart(chosenProduct3);
                         break;
                     default:
                         InputInstructions();
@@ -196,7 +230,7 @@ namespace Webshoppen2.Models
             Console.ReadLine();
         }
 
-        private static double ShowCart() 
+        private static double ShowCart()
         {
             double? totalCostOfCart = 0;
 
@@ -229,7 +263,7 @@ namespace Webshoppen2.Models
                 {
                     Console.WriteLine("[E] : Edit your cart \n[C] : Checkout\n[B] : Back to start page");
                     var choice = Console.ReadLine();
-                    if (choice == "e")
+                    if (choice == "e" && totalCostOfCart > 0 || choice == "E" && totalCostOfCart > 0)
                     {
                         Console.WriteLine("-----------------------------");
                         Console.WriteLine("Which product do you want to change the amount of?");
@@ -260,17 +294,19 @@ namespace Webshoppen2.Models
                         db.SaveChanges();
                     }
 
-                    else if (choice == "c")
+                    else if (choice == "c" && totalCostOfCart > 0 || choice == "C" && totalCostOfCart > 0)
                     {
                         Checkout((double)totalCostOfCart);
+                        runMenu = true;
                     }
-                    else if (choice == "b")
+                    else if (choice == "b"|| choice == "B")
                     {
                         runMenu = true;
                     }
                     else
                     {
                         InputInstructions();
+                        Console.WriteLine("Or there is nothing in your cart!");
                     }
 
                 }
@@ -461,10 +497,12 @@ namespace Webshoppen2.Models
         }
         internal static void ConfirmOrder(string orderId)
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"Your order has been placed, thank you for your purchase!" +
                 $"\nYour order id is: {orderId}\n" +
-                $" __        __   _                             _                _    \r\n \\ \\      / /__| | ___ ___  _ __ ___   ___   | |__   __ _  ___| | __\r\n  \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\  | '_ \\ / _` |/ __| |/ /\r\n   \\ V  V /  __/ | (_| (_) | | | | | |  __/  | |_) | (_| | (__|   < \r\n    \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|  |_.__/ \\__,_|\\___|_|\\_\\\r\n\r\n\r\n                     \t  .sssssssss.\r\n                    .sssssssssssssssssss\r\n                  sssssssssssssssssssssssss\r\n                ssssssssssssssssssssssssssss\r\n                 @@sssssssssssssssssssssss@ss\r\n                 |s@@@@sssssssssssssss@@@@s|s\r\n          _______|sssss@@@@@sssss@@@@@sssss|s\r\n        /         sssssssss@sssss@sssssssss|s\r\n       /  .------+.ssssssss@sssss@ssssssss.|\r\n      /  /       |...sssssss@sss@sssssss...|\r\n     |  |        |.......sss@sss@ssss......|\r\n     |  |        |..........s@ss@sss.......|\r\n     |  |        |...........@ss@..........|\r\n      \\  \\       |............ss@..........|\r\n       \\  '------+...........ss@...........|\r\n        \\________ .........................|\r\n                 |.........................|\r\n                /...........................\\\r\n               |.............................|\r\n                  |.......................|\r\n                      |...............|");
-            // ev back to shopping alternativ
+                $"\r\n  _____ _                 _                                            _ \r\n |_   _| |__   __ _ _ __ | | __  _   _  ___  _   _      __ _ _ __   __| |\r\n   | | | '_ \\ / _` | '_ \\| |/ / | | | |/ _ \\| | | |    / _` | '_ \\ / _` |\r\n   | | | | | | (_| | | | |   <  | |_| | (_) | |_| |_  | (_| | | | | (_| |\r\n   |_| |_| |_|\\__,_|_| |_|_|\\_\\  \\__, |\\___/ \\__,_( )  \\__,_|_| |_|\\__,_|\r\n               _                 |___/            |/          _       _  \r\n __      _____| | ___ ___  _ __ ___   ___    __ _  __ _  __ _(_)_ __ | | \r\n \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\  / _` |/ _` |/ _` | | '_ \\| | \r\n  \\ V  V /  __/ | (_| (_) | | | | | |  __/ | (_| | (_| | (_| | | | | |_| \r\n   \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|  \\__,_|\\__, |\\__,_|_|_| |_(_) \r\n                                                  |___/                  \r\n\r\n                     \t  .sssssssss.\r\n                    .sssssssssssssssssss\r\n                  sssssssssssssssssssssssss\r\n                ssssssssssssssssssssssssssss\r\n                 @@sssssssssssssssssssssss@ss\r\n                 |s@@@@sssssssssssssss@@@@s|s\r\n          _______|sssss@@@@@sssss@@@@@sssss|s\r\n        /         sssssssss@sssss@sssssssss|s\r\n       /  .------+.ssssssss@sssss@ssssssss.|\r\n      /  /       |...sssssss@sss@sssssss...|\r\n     |  |        |.......sss@sss@ssss......|\r\n     |  |        |..........s@ss@sss.......|\r\n     |  |        |...........@ss@..........|\r\n      \\  \\       |............ss@..........|\r\n       \\  '------+...........ss@...........|\r\n        \\________ .........................|\r\n                 |.........................|\r\n                /...........................\\\r\n               |.............................|\r\n                  |.......................|\r\n                      |...............|");
+            Console.ResetColor();
+            Console.ReadKey();
         }
         internal static void Categories()
         {
@@ -525,8 +563,12 @@ namespace Webshoppen2.Models
 
         private static void ShowInfoOnProduct()
         {
-            Console.WriteLine("Choose product-Id to see more.");
-            int choosenNumber = 0; choosenNumber = Methods.TryNumberInt();
+            Console.WriteLine("Choose product-Id to see more. Or press [0] to go back.");
+            int choosenNumber = Methods.TryNumberInt();
+            if(choosenNumber == 0)
+            {
+                StartPage(loggedInId);
+            }
             using (var db = new webshoppenContext())
             {
                 foreach (var p in db.Products.Where(y => y.Id == choosenNumber).Include(x => x.Supplier).Include(c => c.Supplier.City))
@@ -619,15 +661,15 @@ namespace Webshoppen2.Models
         internal static void CartChoice(int chosenNumber)
         {
 
-            Console.WriteLine("Add to cart?");
+            Console.WriteLine("Add to cart? Press [y]es or [n]o");
             var choice = Console.ReadLine();
-            if (choice == "y")
+            if (choice == "y" || choice == "Y")
             {
                 AddProductToCart(chosenNumber);
             }
-            else if (choice == "n")
+            else if (choice == "n" || choice == "N")
             {
-                Categories();
+                StartPage(loggedInId);
             }
             else
             {

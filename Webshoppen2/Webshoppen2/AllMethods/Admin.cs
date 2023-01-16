@@ -540,13 +540,13 @@ namespace Webshoppen2.AllMethods
 
         public static void EditProduct()
         {
-            Console.WriteLine("\nInput id of the category you want to edit");
+            Console.WriteLine("\n\nInput id of the category you want to edit");
             ShowListCategory();
-            Console.SetCursorPosition(0, 17);
+            Console.SetCursorPosition(0, 14);
             var categoryId = Methods.TryNumberInt();
             Console.WriteLine("Input id of product you want to edit");
             ShowListproducts(categoryId);
-            Console.SetCursorPosition(0, 18);
+            Console.SetCursorPosition(0, 16);
             var productId = Methods.TryNumberInt();
 
 
