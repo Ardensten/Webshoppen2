@@ -7,5 +7,6 @@ namespace Webshoppen2.Models
     {
         public int Id { get; set; }
         public string? ParcelServiceName { get; set; }
+        public double? Cost { get; set; }
     }
 }

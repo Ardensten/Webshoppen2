@@ -30,7 +30,8 @@ namespace Webshoppen2.AllMethods
                     + "\n[5] Add Supplier."
                     + "\n[6] Change customer-info."
                     + "\n[7] View purchase histories."
-                    + "\n[8] Log out.");
+                    + "\n[8] Show statistics"
+                    + "\n[9] Log out.");
 
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
@@ -58,17 +59,107 @@ namespace Webshoppen2.AllMethods
                         ViewPurchaseHistory();
                         break;
                     case '8':
+                        ShowStatisticsMenu();
+                        break;
+                    case '9':
                         runMenu = true;
                         break;
                     default:
                         Methods.InputInstructions();
                         break;
                 }
-
-                Console.ReadKey();
-                Console.Clear();
             }
         }
+
+        private static void ShowStatisticsMenu()
+        {
+            bool running = true;
+            while (running)
+            {
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\t\t\t\t     _    ____  __  __ ___ _   _ \r\n\t\t\t\t    / \\  |  _ \\|  \\/  |_ _| \\ | |\r\n\t\t\t\t   / _ \\ | | | | |\\/| || ||  \\| |\r\n\t\t\t\t  / ___ \\| |_| | |  | || || |\\  |\r\n\t\t\t\t /_/   \\_\\____/|_|  |_|___|_| \\_|\r\n\n");
+                Console.ResetColor();
+
+                Console.WriteLine("What statistic do you want to see?" +
+                    "\n[1] Top 3 best selling products" +
+                    "\n[2] Most popular category" +
+                    "\n[3] Most popular Parcelservice" +
+                    "\n[4] Sold out products" +
+                    "\n[5] Go back to Admin Menu");
+
+                ConsoleKeyInfo key = Console.ReadKey(true);
+                ShowStatistics(key, running);
+
+
+
+            }
+        }
+
+        private static void ShowStatistics(ConsoleKeyInfo key, bool running)
+        {
+
+            using (var db = new webshoppenContext())
+            {
+                switch (key.KeyChar)
+                {
+                    case '1': //Best selling products Top 3
+                        var topProducts = (from p in db.Products
+                                           join c in db.Carts on p.Id equals c.ProductId
+                                           select new { ProductName = p.Name, ProductCount = c.ProductId }).ToList().GroupBy(p => p.ProductName);
+                        int count = 1;
+                        Console.WriteLine();
+                        foreach (var product in topProducts.OrderByDescending(p => p.Count()).Take(3))
+                        {
+                            Console.WriteLine($"Top {count} :  {product.Key} , {product.Count()} has been sold");
+                            count++;
+                        }
+                        break;
+
+                    case '2': //Most popular category
+                        var popularCategories = (from c in db.Categories
+                                              join p in db.Products on c.Id equals p.CategoryId
+                                              join ca in db.Carts on p.Id equals ca.ProductId
+                                              select new { CategoryName = c.Name}).ToList().GroupBy(p => p.CategoryName);
+                        Console.WriteLine();
+                        foreach (var category in popularCategories.OrderByDescending(p => p.Count()).Take(1))
+                        {
+                            Console.WriteLine($"{category.Key} is our most popular category!");
+                        }
+                        break;
+
+                    case '3'://Most popular Parcelservice
+                        var popularPostservices = (from s in db.ShippingInfos
+                                                 join o in db.OrderHistories on s.Id equals o.ShippingInfoId
+                                                 select new { PostserviceName = s.ParcelServiceName }).ToList().GroupBy(p => p.PostserviceName);
+                        Console.WriteLine();
+                        foreach (var postservice in popularPostservices.OrderByDescending(p => p.Count()).Take(1))
+                        {
+                            Console.WriteLine($"{postservice.Key} is the most picked Postservice");
+                        }
+                        break;
+
+                    case '4'://Sold out products
+
+                        break;
+
+                    case '5':
+                        running = false;
+                        Menu();
+                        break;
+                    default:
+                        Methods.InputInstructions();
+                        break;
+
+                }
+                Console.ReadKey();
+                Console.Clear();
+
+            }
+
+        }
+
+
 
         private static void AddSupplier()
         {
@@ -144,7 +235,7 @@ namespace Webshoppen2.AllMethods
                         $"Total Cost of {cart.ProductName}: {cart.ProductPrice * cart.ProductAmount}");
                 }
                 totalCost = (double)System.Math.Round((double)totalCost, 2);
-                Console.WriteLine("Total cost of order: " + totalCost); 
+                Console.WriteLine("Total cost of order: " + totalCost);
             }
         }
 
