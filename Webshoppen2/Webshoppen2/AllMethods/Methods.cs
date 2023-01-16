@@ -531,7 +531,7 @@ namespace Webshoppen2.Models
             {
                 foreach (var p in db.Products.Where(y => y.Id == choosenNumber).Include(x => x.Supplier).Include(c => c.Supplier.City))
                 {
-                    Console.WriteLine($"{p.Name} - {p.Price} - {p.UnitsInStock} - {p.InfoText} - {p.Supplier.Name} - {p.Supplier.City.Name}");
+                    Console.WriteLine($"{p.Name} - {p.Price} SEK - Available units: {p.UnitsInStock} - {p.InfoText} - Supplier: {p.Supplier.Name} - {p.Supplier.City.Name}");
                 }
             }
             CartChoice(choosenNumber);
