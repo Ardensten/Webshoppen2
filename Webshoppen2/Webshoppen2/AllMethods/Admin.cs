@@ -24,7 +24,7 @@ namespace Webshoppen2.AllMethods
                 Console.WriteLine("\t\t\t\t     _    ____  __  __ ___ _   _ \r\n\t\t\t\t    / \\  |  _ \\|  \\/  |_ _| \\ | |\r\n\t\t\t\t   / _ \\ | | | | |\\/| || ||  \\| |\r\n\t\t\t\t  / ___ \\| |_| | |  | || || |\\  |\r\n\t\t\t\t /_/   \\_\\____/|_|  |_|___|_| \\_|\r\n\n");
                 Console.ResetColor();
                 Console.WriteLine($"[1] Products."
-                    + "\n[2] Add category."
+                    + "\n[2] Categories."
                     + "\n[3] Add Supplier."
                     + "\n[4] Change customer-info."
                     + "\n[5] View purchase histories."
@@ -75,7 +75,40 @@ namespace Webshoppen2.AllMethods
                             Console.WriteLine();
                             break;
                         case '2':
-                            AddCategory();
+                            Console.Clear();
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("\t\t\t\t     _    ____  __  __ ___ _   _ \r\n\t\t\t\t    / \\  |  _ \\|  \\/  |_ _| \\ | |\r\n\t\t\t\t   / _ \\ | | | | |\\/| || ||  \\| |\r\n\t\t\t\t  / ___ \\| |_| | |  | || || |\\  |\r\n\t\t\t\t /_/   \\_\\____/|_|  |_|___|_| \\_|\r\n\n");
+                            Console.ResetColor();
+                            Console.Write("[1] Add a category."
+                        + "\n[2] Change a category."
+                        + "\n[3] Delete a category."
+                        + "\n[4] Go back.");
+
+                            ConsoleKeyInfo key3 = Console.ReadKey(true);
+
+
+                            switch (key3.KeyChar)
+                            {
+                                case '1':
+                                    AddCategory();
+                                    break;
+
+                                case '2':
+                                    EditCategoryName();
+                                    break;
+
+                                case '3':
+                                    RemoveCategory();
+                                    break;
+                                case '4':
+                                    runMenu = true;
+                                    Admin.Menu();
+                                    break;
+                                default:
+                                    Methods.InputInstructions();
+                                    break;
+
+                            }
                             break;
                         case '3':
                             AddSupplier();
@@ -407,7 +440,8 @@ namespace Webshoppen2.AllMethods
 
         private static void AddCategory()
         {
-            Console.WriteLine("Enter catgory name: ");
+            Console.WriteLine("\nEnter category name: ");
+            ShowListCategory();
             string name = Console.ReadLine();
             using (var db = new webshoppenContext())
             {
@@ -418,6 +452,41 @@ namespace Webshoppen2.AllMethods
                 var categoryList = db.Categories;
                 categoryList.Add(newCategory);
                 db.SaveChanges();
+            }
+        }
+        private static void RemoveCategory()
+        {
+            Console.WriteLine("\nWhat category do you want to remove");
+            ShowListCategory();
+            var categoryId = 0; categoryId = Methods.TryNumberInt();
+
+            using (var db = new webshoppenContext())
+            {
+                var category = db.Categories.Where(x => x.Id == categoryId).SingleOrDefault();
+
+                if (category != null)
+                {
+                    db.Categories.Remove((Category)category);
+                    db.SaveChanges();
+                }
+            }
+        }
+        private static void EditCategoryName()
+        {
+            using (var db = new webshoppenContext())
+            {
+                Console.WriteLine("\nInput id of the category you want to edit");
+                ShowListCategory();
+                var categoryId = 0; categoryId = Methods.TryNumberInt();
+                Console.WriteLine("\nWhat is the new name");
+                var newName = Console.ReadLine();
+                var category = db.Categories.Where(x => x.Id == categoryId).SingleOrDefault();
+
+                if (category != null)
+                {
+                    category.Name = newName;
+                    db.SaveChanges();
+                }
             }
         }
 
