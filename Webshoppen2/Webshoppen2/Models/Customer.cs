@@ -1,13 +1,15 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 
 namespace Webshoppen2.Models
 {
+    [Index(nameof(SocialSecurityNumber), IsUnique = true)]
     public partial class Customer
     {
         public int Id { get; set; }
         public string? Name { get; set; }
-        public long? SocialSecurityNumber { get; set; }
+        public long SocialSecurityNumber { get; set; }
         public int? PhoneNumber { get; set; }
         public string? Email { get; set; }
         public int? CityId { get; set; }

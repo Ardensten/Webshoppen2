@@ -58,21 +58,26 @@ namespace Webshoppen2.Models
 
         public static void SignUp()
         {
-                Console.Write($"Name: ");
-                string name = Console.ReadLine();
-                Console.Write("Social security number: ");
-                long socialSecurityNumber = TryNumberLong();
-                Console.Write("Phone number: ");
-                int phoneNumber = TryNumberInt();
-                Console.Write("Email: ");
-                string email = Console.ReadLine();
-                Console.Write("CityID: ");
+            Console.Write($"Name: ");
+            string name = Console.ReadLine();
+            Console.Write("Social security number: ");
+            long socialSecurityNumber = TryNumberLong(); // detta är en unique nu, det krashar om man skriver samma, säkra detta
+            Console.Write("Phone number: ");
+            int phoneNumber = TryNumberInt();
+            Console.Write("Email: ");
+            string email = Console.ReadLine();
+
+            using (var db = new webshoppenContext())
+            {
+                foreach (var cities in db.Cities)
+                {
+                    Console.WriteLine($"Id: [{cities.Id}]\t{cities.Name}");
+                }
+                Console.Write("Choose a city by writing the corresponding id: ");
                 int cityId = TryNumberInt();
                 Console.Write("Adress: ");
                 string adress = Console.ReadLine();
-           
-            using (var db = new webshoppenContext())
-            {
+
                 var newCustomer = new Customer
                 {
                     Name = name,
@@ -88,7 +93,7 @@ namespace Webshoppen2.Models
             }
         }
 
-        public static void UserLogIn()  //Måste kolla så användaren finns!!
+        public static void UserLogIn()
         {
             Console.WriteLine("Please enter your social security number (YYYYMMDDXXXX): ");
             long socialSecurityNumber = TryNumberLong();
@@ -285,27 +290,45 @@ namespace Webshoppen2.Models
                         Console.ResetColor();
                         int productAmount = TryNumberInt();
 
+                        var carts = from c in db.Carts
+                                    join p in db.Products on c.ProductId equals p.Id
+                                    where c.CustomerId == loggedInId
+                                    select new
+                                    {
+                                        ProductId = c.ProductId,
+                                        CustomerId = c.CustomerId,
+                                        OrderId = c.OrderId,
+                                        AmountOfUnits = c.AmountofUnits,
+                                        UnitsInStock = p.UnitsInStock
+                                    };
+
                         var products = db.Carts.Where(p => p.ProductId == cartProductId);
-                        var carts = db.Carts.Where(p => p.CustomerId == loggedInId);
+                        //var carts = db.Carts.Where(p => p.CustomerId == loggedInId);
 
                         foreach (var c in carts)
                         {
-                            if (cartProductId == c.ProductId && loggedInId == c.CustomerId && c.OrderId == null)
+                            if (cartProductId == c.ProductId && c.OrderId == null)
                             {
-                                if (productAmount > 0)
-                                {
-                                    c.AmountofUnits = productAmount;
-                                }
-                                else if (productAmount <= 0 && products != null)
+                                if (productAmount <= 0 && products != null)
                                 {
                                     foreach (var p in products)
                                     {
                                         db.Carts.Remove(p);
                                     }
                                 }
+                                else if (productAmount < c.UnitsInStock)
+                                {
+                                    foreach (var p in products)
+                                    {
+                                        p.AmountofUnits = productAmount;
+                                    }
+                                }
+                                else if (productAmount > c.UnitsInStock)
+                                {
+                                    Console.WriteLine("The product does not have that many units in stock, please input a lower amount!");
+                                }
                             }
                         }
-                        db.SaveChanges();
                     }
 
                     else if (choice == "c" && totalCostOfCart > 0 || choice == "C" && totalCostOfCart > 0)
@@ -322,7 +345,7 @@ namespace Webshoppen2.Models
                         InputInstructions();
                         Console.WriteLine("Or there is nothing in your cart!");
                     }
-
+                    db.SaveChanges();
                 }
             }
             return (double)totalCostOfCart;
@@ -455,7 +478,7 @@ namespace Webshoppen2.Models
                 var vat = totalCostOfCart * 0.25;
                 vat = (double)System.Math.Round((double)vat, 2);
                 Console.WriteLine($"Total cost including shipping-cost and VAT: {totalCostOfCart}\nVAT: {vat}");
-                
+
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write($"\n\nChoose payment-method: \n[D]ebit card | [I]nvoice.");
                 Console.ResetColor();
@@ -504,27 +527,28 @@ namespace Webshoppen2.Models
                     }
                 }
                 db.SaveChanges();
-                ConfirmOrder(randomOrderId);
-
 
                 var product = (from p in db.Products
                                join c in db.Carts on p.Id equals c.ProductId
                                where c.OrderId == float.Parse(randomOrderId)
-                               select new { Stock = p.UnitsInStock, CartAmount = c.AmountofUnits, ProductId = p.Id, CartProductId = c.ProductId });
+                               select new { Stock = p.UnitsInStock, CartAmount = c.AmountofUnits, ProductId = p.Id, CartProductId = c.ProductId, AmountOfUnits = c.AmountofUnits });
                 foreach (var p in db.Products)
                 {
                     foreach (var pr in product)
                     {
-                        if (p.Id == pr.CartProductId)
+                        if (p.Id == pr.CartProductId && pr.AmountOfUnits <= p.UnitsInStock)
                         {
                             p.UnitsInStock -= pr.CartAmount;
+                            ConfirmOrder(randomOrderId);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Something went wrong, please try again.");
+                            ShowCart();
                         }
                     }
                 }
                 db.SaveChanges();
-
-
-
             }
         }
         internal static void ConfirmOrder(string orderId)
@@ -712,28 +736,35 @@ namespace Webshoppen2.Models
             }
         }
 
-        private static void AddProductToCart(int chosenNumber) //Vi måste felsäkra så man inte kan lägga till mer än vad det finns tillgängligt i lagret
+        private static void AddProductToCart(int chosenNumber)
         {
             using (var db = new webshoppenContext())
-            {   
+            {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write("\nHow many do you want to add to your cart?: ");
                 Console.ResetColor();
                 int amountOfUnits = TryNumberInt();
 
-                var product = db.Products.Where(p => p.Id == chosenNumber).ToList();
-                foreach (var p in product)
+                foreach (var product in db.Products.Where(p => p.Id == chosenNumber)) // loopar 2 gånger???
                 {
-                    var cart = new Cart
+                    if (amountOfUnits < product.UnitsInStock)
                     {
-                        ProductId = chosenNumber,
-                        AmountofUnits = amountOfUnits,
-                        CustomerId = loggedInId
-                    };
-                    var cartList = db.Carts;
-                    cartList.Add(cart);
-                    db.SaveChanges();
+                        var cart = new Cart
+                        {
+                            ProductId = chosenNumber,
+                            AmountofUnits = amountOfUnits,
+                            CustomerId = loggedInId
+                        };
+                        var cartList = db.Carts;
+                        cartList.Add(cart);
+                    }
+                    else
+                    {
+                        Console.WriteLine("The product does not have that many units in stock, please try a smaller amount!");
+                        AddProductToCart(chosenNumber);
+                    }
                 }
+                db.SaveChanges();
             }
         }
 
