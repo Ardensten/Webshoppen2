@@ -59,24 +59,22 @@ namespace Webshoppen2.Models
         public static void SignUp()
         {
             Console.Write($"Name: ");
-            string name = Console.ReadLine();
+            string name = TryStringIn();
             Console.Write("Social security number: ");
             long socialSecurityNumber = TryNumberLong(); // detta är en unique nu, det krashar om man skriver samma, säkra detta
             Console.Write("Phone number: ");
             int phoneNumber = TryNumberInt();
-            Console.Write("Email: ");
+            Console.Write("Email (Optional): ");
             string email = Console.ReadLine();
 
             using (var db = new webshoppenContext())
             {
-                foreach (var cities in db.Cities)
-                {
-                    Console.WriteLine($"Id: [{cities.Id}]\t{cities.Name}");
-                }
                 Console.Write("Choose a city by writing the corresponding id: ");
+                Admin.ShowListCities();
+                Console.SetCursorPosition(0, 18);
                 int cityId = TryNumberInt();
                 Console.Write("Adress: ");
-                string adress = Console.ReadLine();
+                string adress = TryStringIn();
 
                 var newCustomer = new Customer
                 {
@@ -718,21 +716,27 @@ namespace Webshoppen2.Models
 
         internal static void CartChoice(int chosenNumber)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("\nAdd to cart? Press [y]es or [n]o: ");
-            Console.ResetColor();
-            var choice = Console.ReadLine();
-            if (choice == "y" || choice == "Y")
+            bool runMenu = false;
+            while (!runMenu)
             {
-                AddProductToCart(chosenNumber);
-            }
-            else if (choice == "n" || choice == "N")
-            {
-                StartPage(loggedInId);
-            }
-            else
-            {
-                InputInstructions();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("\nAdd to cart? Press [y]es or [n]o: ");
+                Console.ResetColor();
+                var choice = Console.ReadLine();
+                if (choice == "y" || choice == "Y")
+                {
+                    AddProductToCart(chosenNumber);
+                    runMenu = true;
+                }
+                else if (choice == "n" || choice == "N")
+                {
+                    runMenu = true;
+                }
+                else
+                {
+                    InputInstructions();
+                }
+
             }
         }
 
@@ -843,6 +847,25 @@ namespace Webshoppen2.Models
             return number;
         }
 
+        internal static string TryStringIn()
+        {
+            bool correctInput = false;
+            string anyWord = null;
+
+            while (!correctInput)
+            {
+                anyWord = Console.ReadLine();
+                if (string.IsNullOrEmpty(anyWord))
+                {
+                    Console.WriteLine("Wrong input! Input can not be null.");
+                }
+                else
+                {
+                    correctInput = true;
+                }
+            }
+            return anyWord;
+        }
         internal static void InputInstructions()
         {
             Console.WriteLine("Wrong input. Try something else!");

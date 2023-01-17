@@ -219,7 +219,7 @@ namespace Webshoppen2.AllMethods
         private static void AddSupplier()
         {
             Console.WriteLine("Enter supplier name: ");
-            string name = Console.ReadLine();
+            string name = Methods.TryStringIn();
 
             ShowListCities();
             Console.WriteLine("\nEnter city-id: ");
@@ -238,7 +238,7 @@ namespace Webshoppen2.AllMethods
             }
         }
 
-        private static void ShowListCities()
+        public static void ShowListCities()
         {
             using (var db = new webshoppenContext())
             {
@@ -336,7 +336,7 @@ namespace Webshoppen2.AllMethods
                     {
                         case '1':
                             Console.WriteLine("What is the new name");
-                            var newName = Console.ReadLine();
+                            var newName = Methods.TryStringIn();
                             var customer = db.Customers.Where(x => x.Id == customerId).SingleOrDefault();
 
                             if (customer != null)
@@ -442,7 +442,7 @@ namespace Webshoppen2.AllMethods
         {
             Console.WriteLine("\nEnter category name: ");
             ShowListCategory();
-            string name = Console.ReadLine();
+            string name = Methods.TryStringIn();
             using (var db = new webshoppenContext())
             {
                 var newCategory = new Category
@@ -458,7 +458,7 @@ namespace Webshoppen2.AllMethods
         {
             Console.WriteLine("\nWhat category do you want to remove");
             ShowListCategory();
-            var categoryId = 0; categoryId = Methods.TryNumberInt();
+            var categoryId = Methods.TryNumberInt();
 
             using (var db = new webshoppenContext())
             {
@@ -477,7 +477,7 @@ namespace Webshoppen2.AllMethods
             {
                 Console.WriteLine("\nInput id of the category you want to edit");
                 ShowListCategory();
-                var categoryId = 0; categoryId = Methods.TryNumberInt();
+                var categoryId = Methods.TryNumberInt();
                 Console.WriteLine("\nWhat is the new name");
                 var newName = Console.ReadLine();
                 var category = db.Categories.Where(x => x.Id == categoryId).SingleOrDefault();
@@ -494,7 +494,7 @@ namespace Webshoppen2.AllMethods
         {
 
             Console.WriteLine("\nEnter product name: ");
-            string name = Console.ReadLine();
+            string name = Methods.TryStringIn();
             Console.WriteLine("\nEnter product price: ");
             double price = Methods.TryNumberDouble();
             Console.WriteLine("\nEnter product supplier-id: ");
