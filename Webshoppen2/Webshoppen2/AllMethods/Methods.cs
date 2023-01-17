@@ -58,19 +58,19 @@ namespace Webshoppen2.Models
 
         public static void SignUp()
         {
-            Console.WriteLine($"Name: ");
-            string name = Console.ReadLine();
-            Console.WriteLine("Social security number: ");
-            long socialSecurityNumber = 0; socialSecurityNumber = TryNumberLong();
-            Console.WriteLine("Phone number: ");
-            int phoneNumber = 0; phoneNumber = TryNumberInt();
-            Console.WriteLine("Email: ");
-            string email = Console.ReadLine();
-            Console.WriteLine("CityID: ");
-            int cityId = 0; cityId = TryNumberInt();
-            Console.WriteLine("Adress: ");
-            string adress = Console.ReadLine();
-
+                Console.Write($"Name: ");
+                string name = Console.ReadLine();
+                Console.Write("Social security number: ");
+                long socialSecurityNumber = TryNumberLong();
+                Console.Write("Phone number: ");
+                int phoneNumber = TryNumberInt();
+                Console.Write("Email: ");
+                string email = Console.ReadLine();
+                Console.Write("CityID: ");
+                int cityId = TryNumberInt();
+                Console.Write("Adress: ");
+                string adress = Console.ReadLine();
+           
             using (var db = new webshoppenContext())
             {
                 var newCustomer = new Customer
@@ -143,9 +143,9 @@ namespace Webshoppen2.Models
                                           select new { ProductName = p.Name, ProductPrice = p.Price, Productid = p.Id, ChosenProduct = p.ChosenProduct, CategoryId = c.Id, CategoryName = c.Name }).ToList();
 
 
-                        Console.Write("\t\t\t\t \t\t\t  _\r\n \t\t\t\t\t\t\t {_}\r\n \t\t\t\t\t\t\t |(|\r\n\t\t\t\t\t\t\t |=|\r\n\t\t\t\t\t\t\t/   \\\t\t\t\t\t  [-] \r\n\t\t.~~~~.\t\t\t\t\t|.--| \t\t\t\t\t.-'-'-. \r\n\t\ti====i_\t\t\t\t\t||  |\t\t\t\t\t:-...-: \r\n\t\t|cccc|_)\t\t\t\t||  |\t\t\t\t\t|;:   | \r\n\t\t|cccc|   \t\t\t\t|'--|\t\t\t\t\t|;:.._|\r\n\t\t`-==-'\t\t\t\t\t'-=-'\t\t\t\t\t`-...-'");
+                    Console.Write("\t\t\t\t \t\t\t  _\r\n \t\t\t\t\t\t\t {_}\r\n \t\t\t\t\t\t\t |(|\r\n\t\t\t\t\t\t\t |=|\r\n\t\t\t\t\t\t\t/   \\\t\t\t\t\t  [-] \r\n\t\t.~~~~.\t\t\t\t\t|.--| \t\t\t\t\t.-'-'-. \r\n\t\ti====i_\t\t\t\t\t||  |\t\t\t\t\t:-...-: \r\n\t\t|cccc|_)\t\t\t\t||  |\t\t\t\t\t|;:   | \r\n\t\t|cccc|   \t\t\t\t|'--|\t\t\t\t\t|;:.._|\r\n\t\t`-==-'\t\t\t\t\t'-=-'\t\t\t\t\t`-...-'");
 
-                    
+
                     foreach (var p in chosenProducts.OrderBy(p => p.CategoryId))
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
@@ -222,11 +222,21 @@ namespace Webshoppen2.Models
                 products = db.Query<Models.Product>(sql).ToList();
             }
 
+            Console.WriteLine();
             foreach (var product in products)
             {
-                Console.WriteLine($"\nId [{product.Id}]\t{product.Name}\t{product.Price}Sek");
+                Console.WriteLine($"Id [{product.Id}]\t{product.Name}\t{product.Price}Sek");
             }
-            ShowInfoOnProduct();
+            if (products.Count() == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Your search returned no results. Try something else!");
+                Console.ResetColor();
+            }
+            else
+            {
+                ShowInfoOnProduct();
+            }
             Console.ReadLine();
         }
 
@@ -266,9 +276,13 @@ namespace Webshoppen2.Models
                     if (choice == "e" && totalCostOfCart > 0 || choice == "E" && totalCostOfCart > 0)
                     {
                         Console.WriteLine("-----------------------------");
-                        Console.WriteLine("Which product do you want to change the amount of?");
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write("Which product do you want to change the amount of? ");
+                        Console.ResetColor();
                         int cartProductId = TryNumberInt();
-                        Console.WriteLine("Enter the number you want in cart.");
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write("Enter the number you want in cart: ");
+                        Console.ResetColor();
                         int productAmount = TryNumberInt();
 
                         var products = db.Carts.Where(p => p.ProductId == cartProductId);
@@ -299,7 +313,7 @@ namespace Webshoppen2.Models
                         Checkout((double)totalCostOfCart);
                         runMenu = true;
                     }
-                    else if (choice == "b"|| choice == "B")
+                    else if (choice == "b" || choice == "B")
                     {
                         runMenu = true;
                     }
@@ -330,8 +344,11 @@ namespace Webshoppen2.Models
                                 select new { Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId, OrderId = c.OrderId }).ToList();
 
                 Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Choose shipping method: ");
-                Console.WriteLine("[P]ostnord 49 SEK || [D]HL 99 SEK");
+                Console.Write("[P]ostnord 49 SEK || [D]HL 99 SEK. ");
+                Console.ResetColor();
+                Console.Write(" Your choice: ");
                 var choice = Console.ReadLine();
                 if (choice == "P" || choice == "p")
                 {
@@ -362,10 +379,13 @@ namespace Webshoppen2.Models
         }
         internal static void GetShippingInfo(double totalCostOfCart)
         {
-            Console.WriteLine("Would you like to use your saved address as your shipping address? [y / n]");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("\nWould you like to use your saved address as your shipping address? [y / n]: ");
+            Console.ResetColor();
             var choice = Console.ReadLine();
+            Console.WriteLine();
 
-            if (choice == "y")
+            if (choice == "y" || choice == "Y")
             {
                 using (var db = new webshoppenContext())
                 {
@@ -387,11 +407,15 @@ namespace Webshoppen2.Models
                     db.SaveChanges();
                 }
             }
-            else if (choice == "n")
+            else if (choice == "n" || choice == "N")
             {
-                Console.WriteLine("Enter the city: ");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("\nEnter the city: ");
+                Console.ResetColor();
                 var newCity = Console.ReadLine();
-                Console.WriteLine("Enter the street-name: ");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("Enter the street-name: ");
+                Console.ResetColor();
                 var newStreetName = Console.ReadLine();
 
                 using (var db = new webshoppenContext())
@@ -418,7 +442,9 @@ namespace Webshoppen2.Models
                             where cu.Id == loggedInId
                             select new { Name = p.Name, Price = p.Price, AmountofUnits = c.AmountofUnits, CartId = c.Id, CartProductId = c.ProductId, CartCustomerId = c.CustomerId, OrderId = c.OrderId }).ToList();
 
-                Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\n\nYour cart:");
+                Console.ResetColor();
                 foreach (var item in cart)
                 {
                     if (item.OrderId == null)
@@ -429,14 +455,20 @@ namespace Webshoppen2.Models
                 var vat = totalCostOfCart * 0.25;
                 vat = (double)System.Math.Round((double)vat, 2);
                 Console.WriteLine($"Total cost including shipping-cost and VAT: {totalCostOfCart}\nVAT: {vat}");
-                Console.WriteLine($"Choose payment-method: \n[D]ebit card\n[I]nvoice");
+                
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write($"\n\nChoose payment-method: \n[D]ebit card | [I]nvoice.");
+                Console.ResetColor();
+                Console.Write(" Your choice: ");
                 var payChoice = Console.ReadLine();
                 var orderHistory = (from o in db.OrderHistories
                                     where o.CheckoutCartOrderId == null
                                     select o);
-                if (payChoice == "d")
+                if (payChoice == "d" || payChoice == "D")
                 {
-                    Console.WriteLine("Enter card number:");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write("Enter card number:");
+                    Console.ResetColor();
                     var cardNumber = Console.ReadLine();
                     foreach (var o in orderHistory)
                     {
@@ -444,7 +476,7 @@ namespace Webshoppen2.Models
                     }
                     db.SaveChanges();
                 }
-                else if (payChoice == "i")
+                else if (payChoice == "i" || payChoice == "I")
                 {
                     Console.WriteLine("The users personal number has been used to file an invoice");
                     foreach (var o in orderHistory)
@@ -498,7 +530,7 @@ namespace Webshoppen2.Models
         internal static void ConfirmOrder(string orderId)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"Your order has been placed, thank you for your purchase!" +
+            Console.WriteLine($"\n\nYour order has been placed, thank you for your purchase!" +
                 $"\nYour order id is: {orderId}\n" +
                 $"\r\n  _____ _                 _                                            _ \r\n |_   _| |__   __ _ _ __ | | __  _   _  ___  _   _      __ _ _ __   __| |\r\n   | | | '_ \\ / _` | '_ \\| |/ / | | | |/ _ \\| | | |    / _` | '_ \\ / _` |\r\n   | | | | | | (_| | | | |   <  | |_| | (_) | |_| |_  | (_| | | | | (_| |\r\n   |_| |_| |_|\\__,_|_| |_|_|\\_\\  \\__, |\\___/ \\__,_( )  \\__,_|_| |_|\\__,_|\r\n               _                 |___/            |/          _       _  \r\n __      _____| | ___ ___  _ __ ___   ___    __ _  __ _  __ _(_)_ __ | | \r\n \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\  / _` |/ _` |/ _` | | '_ \\| | \r\n  \\ V  V /  __/ | (_| (_) | | | | | |  __/ | (_| | (_| | (_| | | | | |_| \r\n   \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|  \\__,_|\\__, |\\__,_|_|_| |_(_) \r\n                                                  |___/                  \r\n\r\n                     \t  .sssssssss.\r\n                    .sssssssssssssssssss\r\n                  sssssssssssssssssssssssss\r\n                ssssssssssssssssssssssssssss\r\n                 @@sssssssssssssssssssssss@ss\r\n                 |s@@@@sssssssssssssss@@@@s|s\r\n          _______|sssss@@@@@sssss@@@@@sssss|s\r\n        /         sssssssss@sssss@sssssssss|s\r\n       /  .------+.ssssssss@sssss@ssssssss.|\r\n      /  /       |...sssssss@sss@sssssss...|\r\n     |  |        |.......sss@sss@ssss......|\r\n     |  |        |..........s@ss@sss.......|\r\n     |  |        |...........@ss@..........|\r\n      \\  \\       |............ss@..........|\r\n       \\  '------+...........ss@...........|\r\n        \\________ .........................|\r\n                 |.........................|\r\n                /...........................\\\r\n               |.............................|\r\n                  |.......................|\r\n                      |...............|");
             Console.ResetColor();
@@ -563,9 +595,11 @@ namespace Webshoppen2.Models
 
         private static void ShowInfoOnProduct()
         {
-            Console.WriteLine("Choose product-Id to see more. Or press [0] to go back.");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("\nChoose product-Id to see more. Or press [0] to go back: ");
+            Console.ResetColor();
             int choosenNumber = Methods.TryNumberInt();
-            if(choosenNumber == 0)
+            if (choosenNumber == 0)
             {
                 StartPage(loggedInId);
             }
@@ -660,8 +694,9 @@ namespace Webshoppen2.Models
 
         internal static void CartChoice(int chosenNumber)
         {
-
-            Console.WriteLine("Add to cart? Press [y]es or [n]o");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("\nAdd to cart? Press [y]es or [n]o: ");
+            Console.ResetColor();
             var choice = Console.ReadLine();
             if (choice == "y" || choice == "Y")
             {
@@ -680,8 +715,10 @@ namespace Webshoppen2.Models
         private static void AddProductToCart(int chosenNumber) //Vi måste felsäkra så man inte kan lägga till mer än vad det finns tillgängligt i lagret
         {
             using (var db = new webshoppenContext())
-            {
-                Console.WriteLine("How many do you want to add to your cart?");
+            {   
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("\nHow many do you want to add to your cart?: ");
+                Console.ResetColor();
                 int amountOfUnits = TryNumberInt();
 
                 var product = db.Products.Where(p => p.Id == chosenNumber).ToList();
