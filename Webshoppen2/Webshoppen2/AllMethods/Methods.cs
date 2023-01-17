@@ -617,22 +617,30 @@ namespace Webshoppen2.Models
 
         private static void ShowInfoOnProduct()
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("\nChoose product-Id to see more. Or press [0] to go back: ");
-            Console.ResetColor();
-            int choosenNumber = Methods.TryNumberInt();
-            if (choosenNumber == 0)
+            bool runMenu = false;
+            while (!runMenu)
             {
-                StartPage(loggedInId);
-            }
-            using (var db = new webshoppenContext())
-            {
-                foreach (var p in db.Products.Where(y => y.Id == choosenNumber).Include(x => x.Supplier).Include(c => c.Supplier.City))
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("\nChoose product-Id to see more. Or press [0] to go back: ");
+                Console.ResetColor();
+                int choosenNumber = Methods.TryNumberInt();
+                if (choosenNumber == 0)
                 {
-                    Console.WriteLine($"{p.Name} - {p.Price} SEK - Available units: {p.UnitsInStock} - {p.InfoText} - Supplier: {p.Supplier.Name} - {p.Supplier.City.Name}");
+                    runMenu = true;
+                }
+                using (var db = new webshoppenContext())
+                {
+                    foreach (var p in db.Products.Where(y => y.Id == choosenNumber).Include(x => x.Supplier).Include(c => c.Supplier.City))
+                    {
+                        Console.WriteLine($"{p.Name} - {p.Price} SEK - Available units: {p.UnitsInStock} - {p.InfoText} - Supplier: {p.Supplier.Name} - {p.Supplier.City.Name}");
+                    }
+                }
+                if(choosenNumber != 0)
+                {
+                    CartChoice(choosenNumber);
+                    runMenu = true;
                 }
             }
-            CartChoice(choosenNumber);
         }
 
         private static void ShowAllChampagne()  //slå ihop alla metoder och ta categori id som en inparameter!!!!!!!!!!!!!!!!!!
