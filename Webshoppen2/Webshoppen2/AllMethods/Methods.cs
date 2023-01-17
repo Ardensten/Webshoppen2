@@ -45,7 +45,7 @@ namespace Webshoppen2.Models
                         SignUp();
                         break;
                     case '3':
-                        Admin.Menu();
+                        Admin.LoginAdmin();
                         break;
                     default:
                         InputInstructions();

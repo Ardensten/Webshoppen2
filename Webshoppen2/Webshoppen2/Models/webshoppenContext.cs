@@ -26,6 +26,7 @@ namespace Webshoppen2.Models
         public virtual DbSet<Product> Products { get; set; } = null!;
         public virtual DbSet<ShippingInfo> ShippingInfos { get; set; } = null!;
         public virtual DbSet<Supplier> Suppliers { get; set; } = null!;
+        public virtual DbSet<AdminClass> AdminClasses { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

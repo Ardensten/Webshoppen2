@@ -13,6 +13,30 @@ namespace Webshoppen2.AllMethods
 {
     internal class Admin
     {
+        internal static void LoginAdmin()
+        {
+            using (var db = new webshoppenContext())
+            {
+                Console.Write("Username: ");
+                string usernName = Methods.TryStringIn();
+                Console.Write("Password: ");
+                string password = ReadPassword();
+
+                foreach(var a in db.AdminClasses)
+                {
+                    if (a.Name == usernName && a.Password == password)
+                    {
+                        Console.WriteLine("Successful login!");
+                        Menu();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Wrong username or password");
+                    }
+                }
+
+            }
+        }
         internal static void Menu()
         {
             bool runMenu = false;
@@ -29,11 +53,13 @@ namespace Webshoppen2.AllMethods
                     + "\n[4] Change customer-info."
                     + "\n[5] View purchase histories."
                     + "\n[6] Show statistics"
+                    + "\n[7] Change Password"
                     + "\n[9] Log out.");
 
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
-                while (!runMenu)
+                bool runMenu2 = false;
+                while (!runMenu2)
                 {
                     switch (key.KeyChar)
                     {
@@ -65,7 +91,7 @@ namespace Webshoppen2.AllMethods
 
                                     break;
                                 case '5':
-                                    runMenu = true;
+                                    runMenu2 = true;
                                     Admin.Menu();
                                     break;
                                 default:
@@ -122,11 +148,16 @@ namespace Webshoppen2.AllMethods
                         case '6':
                             ShowStatisticsMenu();
                             break;
+                        case '7':
+                            //ChangePassword();
+                            break;
                         case '9':
                             runMenu = true;
+                            runMenu2 = true;
                             break;
                         default:
                             Methods.InputInstructions();
+                            runMenu2 = true;
                             break;
                     }
                 }
@@ -729,6 +760,33 @@ namespace Webshoppen2.AllMethods
                     }
                 }
             }
+        }
+        public static string ReadPassword()
+        {
+            string password = "";
+            ConsoleKeyInfo info = Console.ReadKey(true);
+            while (info.Key != ConsoleKey.Enter)
+            {
+                if (info.Key != ConsoleKey.Backspace)
+                {
+                    Console.Write("*");
+                    password += info.KeyChar;
+                }
+                else if (info.Key == ConsoleKey.Backspace)
+                {
+                    if (!string.IsNullOrEmpty(password))
+                    {
+                        password = password.Substring(0, password.Length - 1);
+                        int pos = Console.CursorLeft;
+                        Console.SetCursorPosition(pos - 1, Console.CursorTop);
+                        Console.Write(" ");
+                        Console.SetCursorPosition(pos - 1, Console.CursorTop);
+                    }
+                }
+                info = Console.ReadKey(true);
+            }
+            Console.WriteLine();
+            return password;
         }
     }
 }
