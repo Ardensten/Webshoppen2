@@ -560,58 +560,64 @@ namespace Webshoppen2.Models
         }
         internal static void Categories()
         {
-            Console.Clear();
             bool runCategories = true;
 
             while (runCategories)
             {
+                Console.Clear();
                 using (var db = new webshoppenContext())
                 {
+                    Console.WriteLine("[0] : Go back to start");
                     foreach (var p in db.Categories)
                     {
                         Console.WriteLine($"[{p.Id}] : {p.Name}");
                     }
-                    Console.WriteLine("[Q] : Go back to start");
                 }
-                Console.WriteLine("Input the category-id you wish to view: ");
-                ConsoleKeyInfo key = Console.ReadKey(true);
 
-                switch (key.KeyChar)
+                Console.Write("Input the category-id you wish to view: ");
+                int categoryId = TryNumberInt();
+
+                switch (categoryId)
                 {
-                    case '1':
-                        ShowAllBeer();
-                        Console.WriteLine("Choose a beer: ");
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        ShowAllOfCategory(categoryId);
                         ShowInfoOnProduct();
                         break;
-                    case '2':
-                        ShowAllWine();
-                        Console.WriteLine("Choose a wine: ");
-                        ShowInfoOnProduct();
-                        break;
-                    case '3':
-                        ShowAllSpirits();
-                        Console.WriteLine("Choose spirits: ");
-                        ShowInfoOnProduct();
-                        break;
-                    case '4':
-                        ShowAllChampagne();
-                        Console.WriteLine("Choose a champagne: ");
-                        ShowInfoOnProduct();
-                        break;
-                    case '5':
-                        ShowAllCider();
-                        Console.WriteLine("Choose a cider: ");
-                        ShowInfoOnProduct();
-                        break;
-                    case 'q':
-                    case 'Q':
+                    case 0:
                         runCategories = false;
+                        Console.Clear();
                         break;
                     default:
                         InputInstructions();
                         break;
                 }
-                Console.Clear();
+
+            }
+            Console.Clear();
+        }
+
+
+        private static void ShowAllOfCategory(int categoryId)  //slå ihop alla metoder och ta categori id som en inparameter!!!!!!!!!!!!!!!!!!
+        {
+            using (var db = new webshoppenContext())
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                foreach (var c in db.Categories.Where(x => x.Id == categoryId))
+                {
+                    Console.WriteLine($"\nList of all {c.Name.ToString().ToLower()}. Enjoy!");
+                }
+                Console.ResetColor();
+
+                foreach (var p in db.Products.Where(x => x.CategoryId == categoryId).Include(s => s.Supplier))
+                {
+                    var inStock = p.UnitsInStock > 0 ? "In stock." : "Out of stock.";
+                    Console.WriteLine($" - [ID: {p.Id}] {p.Name}\t\tPrice: {p.Price} SEK\t\t{inStock} {p.UnitsInStock}");
+                }
+                Console.WriteLine();
             }
         }
 
@@ -635,93 +641,14 @@ namespace Webshoppen2.Models
                         Console.WriteLine($"{p.Name} - {p.Price} SEK - Available units: {p.UnitsInStock} - {p.InfoText} - Supplier: {p.Supplier.Name} - {p.Supplier.City.Name}");
                     }
                 }
-                if(choosenNumber != 0)
+                if (choosenNumber != 0)
                 {
                     CartChoice(choosenNumber);
                     runMenu = true;
                 }
-            }
-        }
 
-        private static void ShowAllChampagne()  //slå ihop alla metoder och ta categori id som en inparameter!!!!!!!!!!!!!!!!!!
-        {
-            using (var db = new webshoppenContext())
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"\nList of all champagne. Enjoy!");
-                Console.ResetColor();
-                foreach (var p in db.Products.Where(x => x.CategoryId == 4).Include(s => s.Supplier))
-                {
-                    var inStock = p.UnitsInStock > 0 ? "In stock." : "Out of stock.";
-                    Console.WriteLine($" - [ID: {p.Id}] {p.Name}\tPrice: {p.Price}SEK \t\t{inStock}\t{p.UnitsInStock}");
-                }
-                Console.WriteLine();
             }
         }
-
-        private static void ShowAllCider()
-        {
-            using (var db = new webshoppenContext())
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"\nList of all ciders. Enjoy!");
-                Console.ResetColor();
-                foreach (var p in db.Products.Where(x => x.CategoryId == 5).Include(s => s.Supplier))
-                {
-                    var inStock = p.UnitsInStock > 0 ? "In stock." : "Out of stock.";
-                    Console.WriteLine($" - [ID: {p.Id}] {p.Name}\tPrice: {p.Price}SEK \t\t{inStock}\t{p.UnitsInStock}");
-                }
-                Console.WriteLine();
-            }
-        }
-
-        private static void ShowAllSpirits()
-        {
-            using (var db = new webshoppenContext())
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"\nList of all spirits. Enjoy!");
-                Console.ResetColor();
-                foreach (var p in db.Products.Where(x => x.CategoryId == 3).Include(s => s.Supplier))
-                {
-                    var inStock = p.UnitsInStock > 0 ? "In stock." : "Out of stock.";
-                    Console.WriteLine($" - [ID: {p.Id}] {p.Name}\tPrice: {p.Price}SEK \t\t{inStock}\t{p.UnitsInStock}");
-                }
-                Console.WriteLine();
-            }
-        }
-
-        private static void ShowAllBeer()
-        {
-            using (var db = new webshoppenContext())
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"\nList of beers. Enjoy!");
-                Console.ResetColor();
-                foreach (var p in db.Products.Where(x => x.CategoryId == 1).Include(s => s.Supplier))
-                {
-                    var inStock = p.UnitsInStock > 0 ? "In stock." : "Out of stock.";
-                    Console.WriteLine($" - [ID: {p.Id}] {p.Name}\tPrice: {p.Price}SEK \t\t{inStock}\t{p.UnitsInStock}");
-                }
-                Console.WriteLine();
-            }
-        }
-        private static void ShowAllWine()
-        {
-            using (var db = new webshoppenContext())
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"\nList of all wine. Enjoy!");
-                Console.ResetColor();
-                foreach (var p in db.Products.Where(x => x.CategoryId == 2).Include(s => s.Supplier))
-                {
-                    var inStock = p.UnitsInStock > 0 ? "In stock." : "Out of stock.";
-                    Console.WriteLine($" - [ID: {p.Id}] {p.Name}\tPrice: {p.Price}SEK \t\t{inStock}\t{p.UnitsInStock}");
-                }
-                Console.WriteLine();
-            }
-        }
-
         internal static void CartChoice(int chosenNumber)
         {
             bool runMenu = false;
@@ -880,3 +807,5 @@ namespace Webshoppen2.Models
         }
     }
 }
+
+
