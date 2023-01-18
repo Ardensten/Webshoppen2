@@ -56,17 +56,35 @@ namespace Webshoppen2.Models
 
         public static void SignUp()
         {
-            Console.Write($"Name: ");
-            string name = TryStringIn();
-            Console.Write("Social security number: ");
-            long socialSecurityNumber = TryNumberLong(); // detta är en unique nu, det krashar om man skriver samma, säkra detta
-            Console.Write("Phone number: ");
-            int phoneNumber = TryNumberInt();
-            Console.Write("Email (Optional): ");
-            string email = Console.ReadLine();
-
             using (var db = new webshoppenContext())
             {
+                Console.Write($"Name: ");
+                string name = TryStringIn();
+                bool testSocialSecurityNumber = false;
+                long socialSecurityNumber = 0;
+                while (!testSocialSecurityNumber)
+                {
+                    Console.Write("Social security number: ");
+                    socialSecurityNumber = TryNumberLong();
+                    foreach (var c in db.Customers)
+                    {
+                        if (socialSecurityNumber == c.SocialSecurityNumber)
+                        {
+                            Console.WriteLine("There is already an user with that social security number!");
+                            testSocialSecurityNumber = false;
+                            break;
+                        }
+                        else
+                        {
+                            testSocialSecurityNumber = true;
+                        }
+                    }
+                }
+                Console.Write("Phone number: ");
+                int phoneNumber = TryNumberInt();
+                Console.Write("Email (Optional): ");
+                string email = Console.ReadLine();
+
                 Console.Write("Choose a city by writing the corresponding id: ");
                 Admin.ShowListCities();
                 Console.SetCursorPosition(0, 18);
@@ -465,7 +483,7 @@ namespace Webshoppen2.Models
                     }
                     runShippingInfo = true;
                 }
-                else 
+                else
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("You have to choose between Y or N. See above!");
