@@ -143,34 +143,34 @@ namespace Webshoppen2.Models
 
                     var chosenProducts = (from p in db.Products
                                           join c in db.Categories on p.CategoryId equals c.Id
-                                          select new { ProductName = p.Name, ProductPrice = p.Price, Productid = p.Id, ChosenProduct = p.ChosenProduct, CategoryId = c.Id, CategoryName = c.Name }).ToList();
+                                          select new { ProductName = p.Name, ProductPrice = p.Price, ProductInStock = p.UnitsInStock, Productid = p.Id, ChosenProduct = p.ChosenProduct, CategoryId = c.Id, CategoryName = c.Name }).ToList();
 
-
+                    Console.ForegroundColor = ConsoleColor.Green;
                     Console.Write("\t\t\t\t \t\t\t  _\r\n \t\t\t\t\t\t\t {_}\r\n \t\t\t\t\t\t\t |(|\r\n\t\t\t\t\t\t\t |=|\r\n\t\t\t\t\t\t\t/   \\\t\t\t\t\t  [-] \r\n\t\t.~~~~.\t\t\t\t\t|.--| \t\t\t\t\t.-'-'-. \r\n\t\ti====i_\t\t\t\t\t||  |\t\t\t\t\t:-...-: \r\n\t\t|cccc|_)\t\t\t\t||  |\t\t\t\t\t|;:   | \r\n\t\t|cccc|   \t\t\t\t|'--|\t\t\t\t\t|;:.._|\r\n\t\t`-==-'\t\t\t\t\t'-=-'\t\t\t\t\t`-...-'");
-
+                    Console.ResetColor();
 
                     foreach (var p in chosenProducts.OrderBy(p => p.CategoryId))
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         if (p.CategoryId == 1 && p.ChosenProduct == true)
                         {
-                            Console.Write($"\n\t{p.ProductName}, {p.ProductPrice}SEK \t");
+                            Console.Write($"\n\t{p.ProductName}, {p.ProductPrice}SEK, {p.ProductInStock}*  | ");
                             chosenProduct1 = p.Productid;
                         }
                         else if (p.CategoryId == 2 && p.ChosenProduct == true)
                         {
-                            Console.Write($"\t{p.ProductName}, {p.ProductPrice}SEK \t");
+                            Console.Write($"\t{p.ProductName}, {p.ProductPrice}SEK, {p.ProductInStock}*    |  ");
                             chosenProduct2 = p.Productid;
                         }
                         else if (p.CategoryId == 3 && p.ChosenProduct == true)
                         {
-                            Console.Write($"\t{p.ProductName}, {p.ProductPrice}SEK \t");
+                            Console.Write($"\t{p.ProductName}, {p.ProductPrice}SEK,  {p.ProductInStock}*  \t");
                             chosenProduct3 = p.Productid;
                         }
                         Console.ResetColor();
                     }
 
-                    Console.WriteLine("\n\t\t\t\t\t  To quick add recommended Press []. \n\t\t[B]eer \t\t\t\t\t[W]ine \t\t\t\t\t [S]pirits");
+                    Console.WriteLine("\n\n\t\t\t\t *Units in stock. To quick add recommended Press []. \n\n\t\t[B]eer \t\t\t\t\t[W]ine \t\t\t\t\t [S]pirits");
 
                     Console.WriteLine("\n\n\t\t1. Categories \t\t2. Search products \t\t3. Cart \t\t4. Log out");
 
@@ -596,7 +596,7 @@ namespace Webshoppen2.Models
         }
 
 
-        private static void ShowAllOfCategory(int categoryId) 
+        private static void ShowAllOfCategory(int categoryId)
         {
             using (var db = new webshoppenContext())
             {
@@ -678,24 +678,34 @@ namespace Webshoppen2.Models
                 Console.Write("\nHow many do you want to add to your cart?: ");
                 Console.ResetColor();
                 int amountOfUnits = TryNumberInt();
-
-                foreach (var product in db.Products.Where(p => p.Id == chosenNumber)) // loopar 2 gånger???
+                if (amountOfUnits == 0)
                 {
-                    if (amountOfUnits < product.UnitsInStock)
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("You can not add 0 units to cart.");
+                    Console.ResetColor();
+                    Console.ReadKey();
+                }
+                else
+                {
+
+                    foreach (var product in db.Products.Where(p => p.Id == chosenNumber)) // loopar 2 gånger???
                     {
-                        var cart = new Cart
+                        if (amountOfUnits < product.UnitsInStock)
                         {
-                            ProductId = chosenNumber,
-                            AmountofUnits = amountOfUnits,
-                            CustomerId = loggedInId
-                        };
-                        var cartList = db.Carts;
-                        cartList.Add(cart);
-                    }
-                    else
-                    {
-                        Console.WriteLine("The product does not have that many units in stock, please try a smaller amount!");
-                        AddProductToCart(chosenNumber);
+                            var cart = new Cart
+                            {
+                                ProductId = chosenNumber,
+                                AmountofUnits = amountOfUnits,
+                                CustomerId = loggedInId
+                            };
+                            var cartList = db.Carts;
+                            cartList.Add(cart);
+                        }
+                        else
+                        {
+                            Console.WriteLine("The product does not have that many units in stock, please try a smaller amount!");
+                            AddProductToCart(chosenNumber);
+                        }
                     }
                 }
                 db.SaveChanges();
