@@ -22,7 +22,7 @@ namespace Webshoppen2.AllMethods
                 Console.Write("Password: ");
                 string password = ReadPassword();
 
-                foreach(var a in db.AdminClasses)
+                foreach (var a in db.AdminClasses)
                 {
                     if (a.Name == usernName && a.Password == password)
                     {
@@ -141,12 +141,15 @@ namespace Webshoppen2.AllMethods
                             break;
                         case '4':
                             ChangeCustomerInfo();
+                            runMenu2 = true;
                             break;
                         case '5':
                             ViewPurchaseHistory();
+                            runMenu2 = true;
                             break;
                         case '6':
-                            ShowStatisticsMenu();
+                            ShowStatistics();
+                            runMenu2 = true;
                             break;
                         case '7':
                             //ChangePassword();
@@ -164,7 +167,7 @@ namespace Webshoppen2.AllMethods
             }
         }
 
-        private static void ShowStatisticsMenu()
+        private static void ShowStatistics()
         {
             bool running = true;
             while (running)
@@ -181,15 +184,9 @@ namespace Webshoppen2.AllMethods
                     "\n[5] Go back to Admin Menu");
 
                 ConsoleKeyInfo key = Console.ReadKey(true);
-                ShowStatistics(key, running);
-            }
-        }
 
-        private static void ShowStatistics(ConsoleKeyInfo key, bool running)
-        {
-
-            using (var db = new webshoppenContext())
-            {
+                using (var db = new webshoppenContext())
+            
                 switch (key.KeyChar)
                 {
                     case '1': //Best selling products Top 3
@@ -231,7 +228,6 @@ namespace Webshoppen2.AllMethods
 
                     case '5':
                         running = false;
-                        Menu();
                         break;
                     default:
                         Methods.InputInstructions();
@@ -242,10 +238,8 @@ namespace Webshoppen2.AllMethods
                 Console.Clear();
 
             }
-
+          
         }
-
-
 
         private static void AddSupplier()
         {
@@ -293,19 +287,24 @@ namespace Webshoppen2.AllMethods
         {
             using (var db = new webshoppenContext())
             {
-                Console.WriteLine("Input Security number that you want to check: ");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("\n\nOrder history. Input Security number that you want to check: ");
+                Console.ResetColor();
                 long securityNumber = Methods.TryNumberLong();
                 var purchaseHistory = (from c in db.Customers
                                        join o in db.OrderHistories on c.Id equals o.CustomerId
                                        where c.SocialSecurityNumber == securityNumber
                                        select new { SocialSecurityNumber = c.SocialSecurityNumber, OrderNumber = o.CheckoutCartOrderId, CustomerId = o.CustomerId }).ToList();
 
+                Console.WriteLine();
                 foreach (var purchase in purchaseHistory)
                 {
                     Console.WriteLine($"{purchase.OrderNumber}");
                 }
 
-                Console.WriteLine("Input orderId you want to see more of:");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("\nInput orderId you want to see more of: ");
+                Console.ResetColor();
                 var orderId = Methods.TryNumberFloat();
                 var carts = from c in db.Carts
                             join p in db.Products on c.ProductId equals p.Id
@@ -322,21 +321,22 @@ namespace Webshoppen2.AllMethods
                 }
                 totalCost = (double)System.Math.Round((double)totalCost, 2);
                 Console.WriteLine("Total cost of order: " + totalCost);
+                Console.ReadKey();
             }
         }
 
         private static void ChangeCustomerInfo()
         {
+            bool runMenu = false;
             ShowListCustomers();
             using (var db = new webshoppenContext())
             {
+
                 Console.WriteLine("Input ID number of the customer you want to edit.");
                 var customerId = Methods.TryNumberInt();
-
-
-                bool runMenu = false;
                 while (!runMenu)
                 {
+
                     Console.Clear();
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("\t\t\t\t     _    ____  __  __ ___ _   _ \r\n\t\t\t\t    / \\  |  _ \\|  \\/  |_ _| \\ | |\r\n\t\t\t\t   / _ \\ | | | | |\\/| || ||  \\| |\r\n\t\t\t\t  / ___ \\| |_| | |  | || || |\\  |\r\n\t\t\t\t /_/   \\_\\____/|_|  |_|___|_| \\_|\r\n\n");
