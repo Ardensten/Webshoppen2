@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
@@ -8,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Webshoppen2.Migrations;
 using Webshoppen2.Models;
+using Dapper;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Webshoppen2.AllMethods
 {
@@ -152,7 +155,8 @@ namespace Webshoppen2.AllMethods
                             runMenu2 = true;
                             break;
                         case '7':
-                            //ChangePassword();
+                            ChangePassword();
+                            runMenu2 = true;
                             break;
                         case '9':
                             runMenu = true;
@@ -163,6 +167,47 @@ namespace Webshoppen2.AllMethods
                             runMenu2 = true;
                             break;
                     }
+                }
+            }
+        }
+
+        private static void ChangePassword() //Dapper
+        {
+            bool changePassword = false;
+            using (var db = new webshoppenContext())
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\n\nChange password.");
+                Console.ResetColor();
+                Console.Write("Current: ");
+                string password = ReadPassword();
+
+                foreach (var a in db.AdminClasses)
+                {
+                    if (a.Password == password)
+                    {
+                        changePassword = true;
+                    }
+                    else
+                    {
+                        Console.ForegroundColor= ConsoleColor.Red;
+                        Console.WriteLine("Wrong password");
+                        Console.ReadKey();
+                        Console.ResetColor();
+                    }
+                }
+            }
+            if (changePassword == true)
+            {
+                string connstring = "Server=tcp:grupp3skola.database.windows.net,1433;Initial Catalog=webshoppen;Persist Security Info=False;User ID=grupp3admin;Password=NUskavikoda1234;MultipleActiveResultSets=True;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+                Console.WriteLine("\nUpdate to new password.");
+                string newPassword = ReadPassword();
+                var sql = $"update adminclasses set password = '{newPassword}' where id = 1";
+                var admins = new List<Models.AdminClass>();
+
+                using (var db = new SqlConnection(connstring))
+                {
+                    admins = db.Query<Models.AdminClass>(sql).ToList();
                 }
             }
         }
@@ -186,59 +231,59 @@ namespace Webshoppen2.AllMethods
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
                 using (var db = new webshoppenContext())
-            
-                switch (key.KeyChar)
-                {
-                    case '1': //Best selling products Top 3
-                        var topProducts = (from p in db.Products
-                                           join c in db.Carts on p.Id equals c.ProductId
-                                           select new { ProductName = p.Name, ProductCount = c.ProductId }).ToList().GroupBy(p => p.ProductName);
-                        int count = 1;
-                        Console.WriteLine();
-                        foreach (var product in topProducts.OrderByDescending(p => p.Count()).Take(3))
-                        {
-                            Console.WriteLine($"Top {count} :  {product.Key} , {product.Count()} has been sold");
-                            count++;
-                        }
-                        break;
 
-                    case '2': //Most popular category
-                        var popularCategories = (from c in db.Categories
-                                                 join p in db.Products on c.Id equals p.CategoryId
-                                                 join ca in db.Carts on p.Id equals ca.ProductId
-                                                 select new { CategoryName = c.Name }).ToList().GroupBy(p => p.CategoryName);
-                        Console.WriteLine();
-                        foreach (var category in popularCategories.OrderByDescending(p => p.Count()).Take(1))
-                        {
-                            Console.WriteLine($"{category.Key} is our most popular category!");
-                        }
-                        break;
+                    switch (key.KeyChar)
+                    {
+                        case '1': //Best selling products Top 3
+                            var topProducts = (from p in db.Products
+                                               join c in db.Carts on p.Id equals c.ProductId
+                                               select new { ProductName = p.Name, ProductCount = c.ProductId }).ToList().GroupBy(p => p.ProductName);
+                            int count = 1;
+                            Console.WriteLine();
+                            foreach (var product in topProducts.OrderByDescending(p => p.Count()).Take(3))
+                            {
+                                Console.WriteLine($"Top {count} :  {product.Key} , {product.Count()} has been sold");
+                                count++;
+                            }
+                            break;
 
-                    case '3'://Most popular Parcelservice
-                        var popularPostservices = (from s in db.ShippingInfos
-                                                   join o in db.OrderHistories on s.Id equals o.ShippingInfoId
-                                                   select new { PostserviceName = s.ParcelServiceName }).ToList().GroupBy(p => p.PostserviceName);
-                        Console.WriteLine();
-                        foreach (var postservice in popularPostservices.OrderByDescending(p => p.Count()).Take(1))
-                        {
-                            Console.WriteLine($"{postservice.Key} is the most picked Postservice");
-                        }
-                        break;
+                        case '2': //Most popular category
+                            var popularCategories = (from c in db.Categories
+                                                     join p in db.Products on c.Id equals p.CategoryId
+                                                     join ca in db.Carts on p.Id equals ca.ProductId
+                                                     select new { CategoryName = c.Name }).ToList().GroupBy(p => p.CategoryName);
+                            Console.WriteLine();
+                            foreach (var category in popularCategories.OrderByDescending(p => p.Count()).Take(1))
+                            {
+                                Console.WriteLine($"{category.Key} is our most popular category!");
+                            }
+                            break;
+
+                        case '3'://Most popular Parcelservice
+                            var popularPostservices = (from s in db.ShippingInfos
+                                                       join o in db.OrderHistories on s.Id equals o.ShippingInfoId
+                                                       select new { PostserviceName = s.ParcelServiceName }).ToList().GroupBy(p => p.PostserviceName);
+                            Console.WriteLine();
+                            foreach (var postservice in popularPostservices.OrderByDescending(p => p.Count()).Take(1))
+                            {
+                                Console.WriteLine($"{postservice.Key} is the most picked Postservice");
+                            }
+                            break;
 
 
-                    case '5':
-                        running = false;
-                        break;
-                    default:
-                        Methods.InputInstructions();
-                        break;
+                        case '5':
+                            running = false;
+                            break;
+                        default:
+                            Methods.InputInstructions();
+                            break;
 
-                }
+                    }
                 Console.ReadKey();
                 Console.Clear();
 
             }
-          
+
         }
 
         private static void AddSupplier()

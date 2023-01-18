@@ -374,20 +374,35 @@ namespace Webshoppen2.Models
                 }
 
                 Console.ResetColor();
-                Console.Write("\nEnter id of choice: ");
-                var shippingChoice = TryNumberInt();
-
-                foreach (var s in db.ShippingInfos.Where(x => x.Id == shippingChoice))
+                bool wrongInput = false;
+                bool runPostalChoise = false;
+                while (!runPostalChoise)
                 {
-                    totalCostOfCart += (double)s.Cost;
-                    var newOrder = new OrderHistory
+                    Console.Write("\nEnter id of choice: ");
+                    var shippingChoice = TryNumberInt();
+                    foreach (var s in db.ShippingInfos.Where(x => x.Id == shippingChoice))
                     {
-                        ShippingInfoId = shippingChoice,
-                    };
-                    var orderHistoryList = db.OrderHistories;
-                    orderHistoryList.Add(newOrder);
+                        if (shippingChoice == s.Id)
+                        {
+                            totalCostOfCart += (double)s.Cost;
+                            var newOrder = new OrderHistory
+                            {
+                                ShippingInfoId = shippingChoice,
+                            };
+                            var orderHistoryList = db.OrderHistories;
+                            orderHistoryList.Add(newOrder);
+                            runPostalChoise = true;
+                            wrongInput = true;
+                        }
+                    }
+                    if (wrongInput == false)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("You have to choose from options above!");
+                        Console.ResetColor();
+                    }
+                    db.SaveChanges();
                 }
-                db.SaveChanges();
 
                 GetShippingInfo(totalCostOfCart);
             }
@@ -398,52 +413,65 @@ namespace Webshoppen2.Models
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("\nWould you like to use your saved address as your shipping address? [y / n]: ");
             Console.ResetColor();
-            var choice = Console.ReadLine();
-            Console.WriteLine();
-
-            if (choice == "y" || choice == "Y")
+            bool runShippingInfo = false;
+            while (!runShippingInfo)
             {
-                using (var db = new webshoppenContext())
+
+                var choice = Console.ReadLine();
+                Console.WriteLine();
+
+                if (choice == "y" || choice == "Y")
                 {
-                    var customerInfos = (from c in db.Customers
-                                         join ci in db.Cities on c.CityId equals ci.Id
-                                         where c.Id == loggedInId
-                                         select new { StreetName = c.Adress, City = ci.Name, Name = c.Name });
-                    foreach (var c in customerInfos)
+                    using (var db = new webshoppenContext())
                     {
-                        Console.Write($"{c.Name}\n{c.StreetName}\n{c.City}");
-                        var orders = db.OrderHistories.Where(x => x.CheckoutCartOrderId == null);
-                        foreach (var o in orders)
+                        var customerInfos = (from c in db.Customers
+                                             join ci in db.Cities on c.CityId equals ci.Id
+                                             where c.Id == loggedInId
+                                             select new { StreetName = c.Adress, City = ci.Name, Name = c.Name });
+                        foreach (var c in customerInfos)
                         {
+                            Console.Write($"{c.Name}\n{c.StreetName}\n{c.City}");
+                            var orders = db.OrderHistories.Where(x => x.CheckoutCartOrderId == null);
+                            foreach (var o in orders)
+                            {
 
-                            o.ShippingAddress = c.StreetName;
-                            o.ShippingCity = c.City;
+                                o.ShippingAddress = c.StreetName;
+                                o.ShippingCity = c.City;
+                            }
                         }
+                        db.SaveChanges();
+                        runShippingInfo = true;
                     }
-                    db.SaveChanges();
                 }
-            }
-            else if (choice == "n" || choice == "N")
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("\nEnter the city: ");
-                Console.ResetColor();
-                var newCity = Console.ReadLine();
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("Enter the street-name: ");
-                Console.ResetColor();
-                var newStreetName = Console.ReadLine();
-
-                using (var db = new webshoppenContext())
+                else if (choice == "n" || choice == "N")
                 {
-                    var shippingAddress = db.OrderHistories.Where(x => x.ShippingInfoId == 1);
-                    foreach (var s in shippingAddress)
-                    {
-                        s.ShippingCity = newCity;
-                        s.ShippingAddress = newStreetName;
-                    }
-                    db.SaveChanges();
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write("\nEnter the city: ");
+                    Console.ResetColor();
+                    var newCity = Console.ReadLine();
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write("Enter the street-name: ");
+                    Console.ResetColor();
+                    var newStreetName = Console.ReadLine();
 
+                    using (var db = new webshoppenContext())
+                    {
+                        var shippingAddress = db.OrderHistories.Where(x => x.ShippingInfoId == 1);
+                        foreach (var s in shippingAddress)
+                        {
+                            s.ShippingCity = newCity;
+                            s.ShippingAddress = newStreetName;
+                        }
+                        db.SaveChanges();
+
+                    }
+                    runShippingInfo = true;
+                }
+                else 
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("You have to choose between Y or N. See above!");
+                    Console.ResetColor();
                 }
             }
             PayCheckout(totalCostOfCart);
@@ -475,31 +503,43 @@ namespace Webshoppen2.Models
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write($"\n\nChoose payment-method: \n[D]ebit card | [I]nvoice.");
                 Console.ResetColor();
-                Console.Write(" Your choice: ");
-                var payChoice = Console.ReadLine();
-                var orderHistory = (from o in db.OrderHistories
-                                    where o.CheckoutCartOrderId == null
-                                    select o);
-                if (payChoice == "d" || payChoice == "D")
+                bool runDebitChoice = false;
+                while (!runDebitChoice)
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write("Enter card number:");
-                    Console.ResetColor();
-                    var cardNumber = Console.ReadLine();
-                    foreach (var o in orderHistory)
+                    Console.Write(" Your choice: ");
+                    var payChoice = Console.ReadLine();
+                    var orderHistory = (from o in db.OrderHistories
+                                        where o.CheckoutCartOrderId == null
+                                        select o);
+                    if (payChoice == "d" || payChoice == "D")
                     {
-                        o.PaymentInfoId = 2;
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write("Enter card number:");
+                        Console.ResetColor();
+                        var cardNumber = Console.ReadLine();
+                        foreach (var o in orderHistory)
+                        {
+                            o.PaymentInfoId = 2;
+                        }
+                        db.SaveChanges();
+                        runDebitChoice = true;
                     }
-                    db.SaveChanges();
-                }
-                else if (payChoice == "i" || payChoice == "I")
-                {
-                    Console.WriteLine("The users personal number has been used to file an invoice");
-                    foreach (var o in orderHistory)
+                    else if (payChoice == "i" || payChoice == "I")
                     {
-                        o.PaymentInfoId = 1;
+                        Console.WriteLine("The users personal number has been used to file an invoice");
+                        foreach (var o in orderHistory)
+                        {
+                            o.PaymentInfoId = 1;
+                        }
+                        db.SaveChanges();
+                        runDebitChoice = true;
                     }
-                    db.SaveChanges();
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("You have to choose from options above!");
+                        Console.ResetColor();
+                    }
                 }
 
                 Random rnd = new Random();
@@ -532,15 +572,16 @@ namespace Webshoppen2.Models
                         if (p.Id == pr.CartProductId && pr.AmountOfUnits <= p.UnitsInStock)
                         {
                             p.UnitsInStock -= pr.CartAmount;
-                            ConfirmOrder(randomOrderId);
                         }
-                        else
-                        {
-                            Console.WriteLine("Something went wrong, please try again.");
-                            ShowCart();
-                        }
+                        //else
+                        //{
+                        //    Console.WriteLine("Something went wrong, please try again.");
+                        //    //ShowCart();
+                        //}
                     }
                 }
+
+                ConfirmOrder(randomOrderId);
                 db.SaveChanges();
             }
         }
