@@ -24,9 +24,7 @@ namespace Webshoppen2.Models
             Console.Clear();
             while (true)
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("  ____            _                       _                  _    _ _                 _           _                  _   \r\n / ___| _   _ ___| |_ ___ _ __ ___  _   _| |___   _____  ___| | _| (_)_ __   __ _ ___| |__   ___ | | __ _  __ _  ___| |_ \r\n \\___ \\| | | / __| __/ _ \\ '_ ` _ \\| | | | __\\ \\ / / _ \\/ __| |/ / | | '_ \\ / _` / __| '_ \\ / _ \\| |/ _` |/ _` |/ _ \\ __|\r\n  ___) | |_| \\__ \\ ||  __/ | | | | | |_| | |_ \\ V /  __/ (__|   <| | | | | | (_| \\__ \\ |_) | (_) | | (_| | (_| |  __/ |_ \r\n |____/ \\__, |___/\\__\\___|_| |_| |_|\\__,_|\\__| \\_/ \\___|\\___|_|\\_\\_|_|_| |_|\\__, |___/_.__/ \\___/|_|\\__,_|\\__, |\\___|\\__|\r\n        |___/                                                               |___/                         |___/  ");
-                Console.ResetColor();
+                PrintLogo();
                 Console.WriteLine($"\n\t\t  Welcome to our beautiful webshop! Here can you buy spirits and get wasted!\n\n"
                     + "\n1. Log in."
                     + "\n2. Sign up."
@@ -601,6 +599,7 @@ namespace Webshoppen2.Models
             while (runCategories)
             {
                 Console.Clear();
+                PrintLogo();
                 using (var db = new webshoppenContext())
                 {
                     Console.WriteLine("[0] : Go back to start");
@@ -610,7 +609,7 @@ namespace Webshoppen2.Models
                     }
                 }
 
-                Console.Write("Input the category-id you wish to view: ");
+                Console.Write("Input the category-id you wish to view or [0] to go back: ");
                 int categoryId = TryNumberInt();
 
                 switch (categoryId)
@@ -850,6 +849,13 @@ namespace Webshoppen2.Models
         internal static void InputInstructions()
         {
             Console.WriteLine("Wrong input. Try something else!");
+        }
+
+        internal static void PrintLogo()
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("  ____            _                       _                  _    _ _                 _           _                  _   \r\n / ___| _   _ ___| |_ ___ _ __ ___  _   _| |___   _____  ___| | _| (_)_ __   __ _ ___| |__   ___ | | __ _  __ _  ___| |_ \r\n \\___ \\| | | / __| __/ _ \\ '_ ` _ \\| | | | __\\ \\ / / _ \\/ __| |/ / | | '_ \\ / _` / __| '_ \\ / _ \\| |/ _` |/ _` |/ _ \\ __|\r\n  ___) | |_| \\__ \\ ||  __/ | | | | | |_| | |_ \\ V /  __/ (__|   <| | | | | | (_| \\__ \\ |_) | (_) | | (_| | (_| |  __/ |_ \r\n |____/ \\__, |___/\\__\\___|_| |_| |_|\\__,_|\\__| \\_/ \\___|\\___|_|\\_\\_|_|_| |_|\\__, |___/_.__/ \\___/|_|\\__,_|\\__, |\\___|\\__|\r\n        |___/                                                               |___/                         |___/  \n");
+            Console.ResetColor();
         }
     }
 }

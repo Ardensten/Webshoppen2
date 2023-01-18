@@ -11,6 +11,7 @@ using Webshoppen2.Migrations;
 using Webshoppen2.Models;
 using Dapper;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.EntityFrameworkCore;
 
 namespace Webshoppen2.AllMethods
 {
@@ -37,7 +38,6 @@ namespace Webshoppen2.AllMethods
                         Console.WriteLine("Wrong username or password");
                     }
                 }
-
             }
         }
         internal static void Menu()
@@ -91,7 +91,7 @@ namespace Webshoppen2.AllMethods
                                     RemoveProduct();
                                     break;
                                 case '4':
-
+                                    SoldOutProducts();
                                     break;
                                 case '5':
                                     runMenu2 = true;
@@ -169,6 +169,24 @@ namespace Webshoppen2.AllMethods
                     }
                 }
             }
+        }
+
+        private static void SoldOutProducts()
+        {
+            Console.WriteLine();
+            using (var db = new webshoppenContext())
+            {
+                var products = from p in db.Products
+                               join s in db.Suppliers on p.SupplierId equals s.Id
+                               select new { ProductId = p.Id, ProductName = p.Name, UnitsInStock = p.UnitsInStock, SupplierName = s.Name };
+
+                Console.WriteLine();
+                foreach (var p in products.Where(x => x.UnitsInStock < 1))
+                {
+                    Console.WriteLine($"{p.ProductId} {p.ProductName} {p.SupplierName}");
+                }
+            }
+            Console.ReadKey();
         }
 
         private static void ChangePassword() //Dapper
