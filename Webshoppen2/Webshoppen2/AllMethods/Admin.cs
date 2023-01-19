@@ -183,7 +183,7 @@ namespace Webshoppen2.AllMethods
                 Console.WriteLine();
                 foreach (var p in products.Where(x => x.UnitsInStock < 1))
                 {
-                    Console.WriteLine($"{p.ProductId} {p.ProductName} {p.SupplierName}");
+                    Console.WriteLine($"{p.ProductId}. {p.ProductName} - {p.SupplierName}");
                 }
             }
             Console.ReadKey();
