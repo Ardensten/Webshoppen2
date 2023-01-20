@@ -16,6 +16,8 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Webshoppen2.Models
 {
+    //existerande kund: 0008086647
+    //gör gärna en egen!
     internal class Methods
     {
         static int loggedInId;
@@ -53,7 +55,6 @@ namespace Webshoppen2.Models
                 Console.Clear();
             }
         }
-
         public static void SignUp()
         {
             using (var db = new webshoppenContext())
@@ -106,20 +107,19 @@ namespace Webshoppen2.Models
                 db.SaveChanges();
             }
         }
-
         public static void UserLogIn()
         {
             Console.WriteLine("Please enter your social security number (YYYYMMDDXXXX): ");
             long socialSecurityNumber = TryNumberLong();
-            //Console.WriteLine("Log in with your BankID");
-            //Thread.Sleep(1000);
-            //Console.Write(".");
-            //Thread.Sleep(1000);
-            //Console.Write(".");
-            //Thread.Sleep(1000);
-            //Console.WriteLine(".");
-            //Console.WriteLine("Login successful!");
-            //Console.ReadKey();
+            Console.WriteLine("Log in with your BankID");
+            Thread.Sleep(1000);
+            Console.Write(".");
+            Thread.Sleep(1000);
+            Console.Write(".");
+            Thread.Sleep(1000);
+            Console.WriteLine(".");
+            Console.WriteLine("Login successful!");
+            Console.ReadKey();
 
             using (var db = new webshoppenContext())
             {
@@ -137,7 +137,6 @@ namespace Webshoppen2.Models
                 }
             }
         }
-
         public static void StartPage(int id)
         {
             Console.Clear();
@@ -227,7 +226,6 @@ namespace Webshoppen2.Models
                 Console.Clear();
             }
         }
-
         private static void Search()  //Dapper
         {
             string connstring = "Server=tcp:grupp3skola.database.windows.net,1433;Initial Catalog=webshoppen;Persist Security Info=False;User ID=grupp3admin;Password=NUskavikoda1234;MultipleActiveResultSets=True;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
@@ -256,9 +254,7 @@ namespace Webshoppen2.Models
             {
                 ShowInfoOnProduct();
             }
-            Console.ReadLine();
         }
-
         private static double ShowCart()
         {
             double? totalCostOfCart = 0;
@@ -317,7 +313,6 @@ namespace Webshoppen2.Models
                                     };
 
                         var products = db.Carts.Where(p => p.ProductId == cartProductId);
-                        //var carts = db.Carts.Where(p => p.CustomerId == loggedInId);
 
                         foreach (var c in carts)
                         {
@@ -364,7 +359,6 @@ namespace Webshoppen2.Models
             }
             return (double)totalCostOfCart;
         }
-
         public static double Checkout(double totalCostOfCart)
         {
 
@@ -652,8 +646,6 @@ namespace Webshoppen2.Models
             }
             Console.Clear();
         }
-
-
         private static void ShowAllOfCategory(int categoryId)
         {
             using (var db = new webshoppenContext())

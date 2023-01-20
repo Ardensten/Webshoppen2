@@ -8,7 +8,6 @@ namespace Webshoppen2
         static void Main(string[] args)
         {
            Methods.Running();
-
         }
     }
 }

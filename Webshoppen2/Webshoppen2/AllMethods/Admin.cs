@@ -15,6 +15,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Webshoppen2.AllMethods
 {
+    //admin användarnamn: admin 
+    //lösenord: admin
     internal class Admin
     {
         internal static void LoginAdmin()
@@ -170,7 +172,6 @@ namespace Webshoppen2.AllMethods
                 }
             }
         }
-
         private static void SoldOutProducts()
         {
             Console.WriteLine();
@@ -188,7 +189,6 @@ namespace Webshoppen2.AllMethods
             }
             Console.ReadKey();
         }
-
         private static void ChangePassword() //Dapper
         {
             bool changePassword = false;
@@ -229,7 +229,6 @@ namespace Webshoppen2.AllMethods
                 }
             }
         }
-
         private static void ShowStatistics()
         {
             bool running = true;
@@ -303,7 +302,6 @@ namespace Webshoppen2.AllMethods
             }
 
         }
-
         private static void AddSupplier()
         {
             Console.WriteLine("Enter supplier name: ");
@@ -325,7 +323,6 @@ namespace Webshoppen2.AllMethods
                 db.SaveChanges();
             }
         }
-
         public static void ShowListCities()
         {
             using (var db = new webshoppenContext())
@@ -345,7 +342,6 @@ namespace Webshoppen2.AllMethods
 
             }
         }
-
         private static void ViewPurchaseHistory()
         {
             using (var db = new webshoppenContext())
@@ -387,7 +383,6 @@ namespace Webshoppen2.AllMethods
                 Console.ReadKey();
             }
         }
-
         private static void ChangeCustomerInfo()
         {
             bool runMenu = false;
@@ -510,8 +505,6 @@ namespace Webshoppen2.AllMethods
                 }
             }
         }
-
-
         private static void ShowListCustomers()
         {
             using (var db = new webshoppenContext())
@@ -531,7 +524,6 @@ namespace Webshoppen2.AllMethods
 
             }
         }
-
         private static void AddCategory()
         {
             Console.WriteLine("\nEnter category name: ");
@@ -583,7 +575,6 @@ namespace Webshoppen2.AllMethods
                 }
             }
         }
-
         private static void AddProduct()
         {
 
@@ -622,8 +613,6 @@ namespace Webshoppen2.AllMethods
                 db.SaveChanges();
             }
         }
-
-
         private static void ShowListproducts(int categoryId)
         {
             using (var db = new webshoppenContext())
@@ -643,7 +632,6 @@ namespace Webshoppen2.AllMethods
 
             }
         }
-
         private static void ShowListSupplier()
         {
             using (var db = new webshoppenContext())
@@ -663,7 +651,6 @@ namespace Webshoppen2.AllMethods
 
             }
         }
-
         private static void ShowListCategory()
         {
             using (var db = new webshoppenContext())
@@ -683,7 +670,6 @@ namespace Webshoppen2.AllMethods
 
             }
         }
-
         public static void RemoveProduct()
         {
             Console.WriteLine("Input id of product you want to delete");
@@ -700,7 +686,6 @@ namespace Webshoppen2.AllMethods
                 }
             }
         }
-
         public static void EditProduct()
         {
             Console.WriteLine("\n\nInput id of the category you want to edit");
